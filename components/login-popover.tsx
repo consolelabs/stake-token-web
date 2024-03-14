@@ -5,13 +5,8 @@ import {
   PopoverPortal,
   PopoverTrigger,
 } from "@mochi-ui/core";
-import { useLoginWidget } from "@mochi-web3/login-widget";
-import dynamic from "next/dynamic";
+import { LoginWidget, useLoginWidget } from "@mochi-web3/login-widget";
 import { useState } from "react";
-
-const LoginWidget = dynamic(() =>
-  import("@mochi-web3/login-widget").then((m) => m.LoginWidget)
-);
 
 export const LoginPopover = () => {
   const { isLoadingProfile } = useLoginWidget();
@@ -22,7 +17,7 @@ export const LoginPopover = () => {
       <PopoverTrigger
         className="text-left"
         asChild
-        // wrap Button by div to prevent event loss when use `asChild` props
+      // wrap Button by div to prevent event loss when use `asChild` props
       >
         <div>
           <Button className="justify-center w-20" loading={isLoadingProfile}>
