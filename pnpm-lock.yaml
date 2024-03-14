@@ -15,8 +15,16 @@ dependencies:
     specifier: ^0.17.0
     version: 0.17.0(tailwindcss@3.3.0)
   '@mochi-web3/login-widget':
+<<<<<<< Updated upstream
     specifier: ^0.2.7
     version: 0.2.7(@types/react-dom@18.0.0)(@types/react@18.0.0)(ioredis@5.3.2)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2)
+=======
+    specifier: ^0.2.10
+    version: 0.2.10(@types/react-dom@18.0.0)(@types/react@18.0.0)(ioredis@5.3.2)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2)
+  '@radix-ui/react-slider':
+    specifier: ^1.1.2
+    version: 1.1.2(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)
+>>>>>>> Stashed changes
   next:
     specifier: 14.1.3
     version: 14.1.3(react-dom@18.0.0)(react@18.0.0)
@@ -80,16 +88,16 @@ packages:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  /@bonfida/spl-name-service@1.6.1(@solana/web3.js@1.91.0):
+  /@bonfida/spl-name-service@1.6.1(@solana/web3.js@1.91.1):
     resolution: {integrity: sha512-AWIPJM6uoofz2tCDRdD8wf1kCzs32yHYmRRQSIzYJ3HuIDufqoilxn8svxsvKRQA2Fm2up6kqnesROp2aoVMCA==}
     peerDependencies:
       '@solana/web3.js': ^1.75.0
     dependencies:
       '@ethersproject/sha2': 5.7.0
-      '@pythnetwork/client': 2.21.0(@solana/web3.js@1.91.0)
+      '@pythnetwork/client': 2.21.0(@solana/web3.js@1.91.1)
       '@solana/buffer-layout': 4.0.1
-      '@solana/spl-token': 0.3.7(@solana/web3.js@1.91.0)
-      '@solana/web3.js': 1.91.0
+      '@solana/spl-token': 0.3.7(@solana/web3.js@1.91.1)
+      '@solana/web3.js': 1.91.1
       bech32-buffer: 0.2.1
       bn.js: 5.2.1
       borsh: 0.7.0
@@ -109,9 +117,9 @@ packages:
       '@consolelabs/mochi-rest': ^5.3.3
       ioredis: ^5.x.x
     dependencies:
-      '@bonfida/spl-name-service': 1.6.1(@solana/web3.js@1.91.0)
+      '@bonfida/spl-name-service': 1.6.1(@solana/web3.js@1.91.1)
       '@consolelabs/mochi-rest': 5.3.3
-      '@solana/web3.js': 1.91.0
+      '@solana/web3.js': 1.91.1
       change-case: 4.1.2
       ethers: 6.11.1
       ioredis: 5.3.2
@@ -145,9 +153,9 @@ packages:
       '@consolelabs/mochi-rest': ^5.1.9
       ioredis: ^5.x.x
     dependencies:
-      '@bonfida/spl-name-service': 1.6.1(@solana/web3.js@1.91.0)
+      '@bonfida/spl-name-service': 1.6.1(@solana/web3.js@1.91.1)
       '@consolelabs/mochi-rest': 5.3.3
-      '@solana/web3.js': 1.91.0
+      '@solana/web3.js': 1.91.1
       change-case: 4.1.2
       ethers: 6.11.1
       ioredis: 5.3.2
@@ -167,9 +175,9 @@ packages:
     resolution: {integrity: sha512-eny6QNG0WOwqV0zQ7cs/b1tIuzZGmP7U7EcH+ogt4Gdbl8HDmIYVMh/9aTmYZPaFWjtUaI8qSn73uYEXWfATdA==}
     engines: {node: '>=11'}
     dependencies:
-      '@coral-xyz/borsh': 0.29.0(@solana/web3.js@1.91.0)
+      '@coral-xyz/borsh': 0.29.0(@solana/web3.js@1.91.1)
       '@noble/hashes': 1.3.3
-      '@solana/web3.js': 1.91.0
+      '@solana/web3.js': 1.91.1
       bn.js: 5.2.1
       bs58: 4.0.1
       buffer-layout: 1.2.2
@@ -187,24 +195,24 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@coral-xyz/borsh@0.28.0(@solana/web3.js@1.91.0):
+  /@coral-xyz/borsh@0.28.0(@solana/web3.js@1.91.1):
     resolution: {integrity: sha512-/u1VTzw7XooK7rqeD7JLUSwOyRSesPUk0U37BV9zK0axJc1q0nRbKFGFLYCQ16OtdOJTTwGfGp11Lx9B45bRCQ==}
     engines: {node: '>=10'}
     peerDependencies:
       '@solana/web3.js': ^1.68.0
     dependencies:
-      '@solana/web3.js': 1.91.0
+      '@solana/web3.js': 1.91.1
       bn.js: 5.2.1
       buffer-layout: 1.2.2
     dev: false
 
-  /@coral-xyz/borsh@0.29.0(@solana/web3.js@1.91.0):
+  /@coral-xyz/borsh@0.29.0(@solana/web3.js@1.91.1):
     resolution: {integrity: sha512-s7VFVa3a0oqpkuRloWVPdCK7hMbAMY270geZOGfCnaqexrP5dTIpbEHL33req6IYPPJ0hYa71cdvJ1h6V55/oQ==}
     engines: {node: '>=10'}
     peerDependencies:
       '@solana/web3.js': ^1.68.0
     dependencies:
-      '@solana/web3.js': 1.91.0
+      '@solana/web3.js': 1.91.1
       bn.js: 5.2.1
       buffer-layout: 1.2.2
     dev: false
@@ -771,6 +779,23 @@ packages:
       - tailwindcss
     dev: false
 
+  /@mochi-ui/badge@0.3.6(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0):
+    resolution: {integrity: sha512-gGiDLyAW80ZCnhQX8IXNBZm+kXErCnqjqo8U4Uqor3DarzmLQNuQM8vtT+fVdObcxJoa/CVuPPDOML8KQFva6g==}
+    peerDependencies:
+      react: ^18.2.0
+      react-dom: ^18.2.0
+    dependencies:
+      '@mochi-ui/theme': 0.18.0(tailwindcss@3.3.0)
+      '@radix-ui/react-slot': 1.0.2(@types/react@18.0.0)(react@18.0.0)
+      class-variance-authority: 0.7.0
+      clsx: 2.1.0
+      react: 18.0.0
+      react-dom: 18.0.0(react@18.0.0)
+    transitivePeerDependencies:
+      - '@types/react'
+      - tailwindcss
+    dev: false
+
   /@mochi-ui/button@0.4.16(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0):
     resolution: {integrity: sha512-nP++K/rdUI6DYxIDI+Pcmw8uDoaWrtHsvXpUBsSsC/rgazYp1R9PnMUU/uFNdZ6z0ZBcSlmDC7V0h6a2t3+K5w==}
     peerDependencies:
@@ -779,6 +804,24 @@ packages:
     dependencies:
       '@mochi-ui/icons': 0.7.4(react-dom@18.0.0)(react@18.0.0)
       '@mochi-ui/theme': 0.17.0(tailwindcss@3.3.0)
+      '@radix-ui/react-slot': 1.0.2(@types/react@18.0.0)(react@18.0.0)
+      class-variance-authority: 0.7.0
+      clsx: 2.1.0
+      react: 18.0.0
+      react-dom: 18.0.0(react@18.0.0)
+    transitivePeerDependencies:
+      - '@types/react'
+      - tailwindcss
+    dev: false
+
+  /@mochi-ui/button@0.4.17(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0):
+    resolution: {integrity: sha512-45Nmln78ldeh6kVV8i3UPaLvdzl06byBT1Lb/29Y1ovbs8pXGQDMJKWsODfVMUYPQ+xj3qA7eAkdCsWT/tMMkw==}
+    peerDependencies:
+      react: ^18.2.0
+      react-dom: ^18.2.0
+    dependencies:
+      '@mochi-ui/icons': 0.7.4(react-dom@18.0.0)(react@18.0.0)
+      '@mochi-ui/theme': 0.18.0(tailwindcss@3.3.0)
       '@radix-ui/react-slot': 1.0.2(@types/react@18.0.0)(react@18.0.0)
       class-variance-authority: 0.7.0
       clsx: 2.1.0
@@ -935,6 +978,25 @@ packages:
       - tailwindcss
     dev: false
 
+  /@mochi-ui/dropdown@0.2.8(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0):
+    resolution: {integrity: sha512-1hMc508lJ1xRJ0/+HcgUldsFK3QY0d6aC1bEMBKAuSWPSKS+Q9Xs1e+FmVVJh0kFL7tf+rjUQ2QEFiOcLBfj+A==}
+    peerDependencies:
+      react: ^18.2.0
+      react-dom: ^18.2.0
+    dependencies:
+      '@mochi-ui/icons': 0.7.4(react-dom@18.0.0)(react@18.0.0)
+      '@mochi-ui/theme': 0.18.0(tailwindcss@3.3.0)
+      '@radix-ui/react-dropdown-menu': 2.0.6(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)
+      class-variance-authority: 0.7.0
+      clsx: 2.1.0
+      react: 18.0.0
+      react-dom: 18.0.0(react@18.0.0)
+    transitivePeerDependencies:
+      - '@types/react'
+      - '@types/react-dom'
+      - tailwindcss
+    dev: false
+
   /@mochi-ui/footer@0.1.11(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0):
     resolution: {integrity: sha512-0utd9bv39xznKIoL8b7w7Jj0VdSvPluJj/c0BDPOP38X3hXdZFTMPluA7C0gnLxVev92Jn/S1RboT8xXeqyFmg==}
     peerDependencies:
@@ -987,6 +1049,23 @@ packages:
     dependencies:
       '@mochi-ui/icons': 0.7.4(react-dom@18.0.0)(react@18.0.0)
       '@mochi-ui/theme': 0.17.0(tailwindcss@3.3.0)
+      '@radix-ui/react-slot': 1.0.2(@types/react@18.0.0)(react@18.0.0)
+      class-variance-authority: 0.7.0
+      react: 18.0.0
+      react-dom: 18.0.0(react@18.0.0)
+    transitivePeerDependencies:
+      - '@types/react'
+      - tailwindcss
+    dev: false
+
+  /@mochi-ui/icon-button@0.4.18(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0):
+    resolution: {integrity: sha512-GNeWXsWDQleJ4h4daHO6Pbn6bWaOlJVzIdgjRjjO6t6m22wnRNeXKAe6aQDYHGFdhdCTpGP8mNxJO6k/TD4GjQ==}
+    peerDependencies:
+      react: ^18.2.0
+      react-dom: ^18.2.0
+    dependencies:
+      '@mochi-ui/icons': 0.7.4(react-dom@18.0.0)(react@18.0.0)
+      '@mochi-ui/theme': 0.18.0(tailwindcss@3.3.0)
       '@radix-ui/react-slot': 1.0.2(@types/react@18.0.0)(react@18.0.0)
       class-variance-authority: 0.7.0
       react: 18.0.0
@@ -1212,6 +1291,25 @@ packages:
       - tailwindcss
     dev: false
 
+  /@mochi-ui/scroll-area@0.0.7(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0):
+    resolution: {integrity: sha512-wdADVdpbg/ZpHg3GU4SdrjEPRbDbzKBAz4oa7pKOVKiAOM6mbMBHfEASYSWKLNc7M9N4tCgcpL3XegKpSbnYjg==}
+    peerDependencies:
+      react: ^18.2.0
+      react-dom: ^18.2.0
+    dependencies:
+      '@mochi-ui/icons': 0.7.4(react-dom@18.0.0)(react@18.0.0)
+      '@mochi-ui/theme': 0.18.0(tailwindcss@3.3.0)
+      '@radix-ui/react-scroll-area': 1.0.5(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)
+      class-variance-authority: 0.7.0
+      clsx: 2.1.0
+      react: 18.0.0
+      react-dom: 18.0.0(react@18.0.0)
+    transitivePeerDependencies:
+      - '@types/react'
+      - '@types/react-dom'
+      - tailwindcss
+    dev: false
+
   /@mochi-ui/section-header@0.2.7(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0):
     resolution: {integrity: sha512-nqJUgY74QZziwJ8OQmy/gZFk9rPuK+lDCLbKCh3OqPzq23zrW7X6SosvY4hVv8SchoEXGnrtJu71iDDpmzoqpA==}
     peerDependencies:
@@ -1352,8 +1450,45 @@ packages:
       - tailwindcss
     dev: false
 
+  /@mochi-ui/tabs@0.2.8(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0):
+    resolution: {integrity: sha512-Df4dWng7tvCurPldU9oXeSyAXszw1shXCqBJ//eaV6SDY1ZQvWE8gb/n/bGwGkFr13H08V6GoyKdRrYkD6a2YQ==}
+    peerDependencies:
+      react: ^18.2.0
+      react-dom: ^18.2.0
+    dependencies:
+      '@mochi-ui/theme': 0.18.0(tailwindcss@3.3.0)
+      '@radix-ui/react-tabs': 1.0.4(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)
+      class-variance-authority: 0.7.0
+      clsx: 2.1.0
+      react: 18.0.0
+      react-dom: 18.0.0(react@18.0.0)
+    transitivePeerDependencies:
+      - '@types/react'
+      - '@types/react-dom'
+      - tailwindcss
+    dev: false
+
   /@mochi-ui/theme@0.17.0(tailwindcss@3.3.0):
     resolution: {integrity: sha512-HwrJsJnuzPNvbcCFHVxNRpqc2OHhz8a6F5NkhhUazIk+wPcwtS6Zi+QnkH2F38F5Y5V1MrLZZeyiQXBgqvPJCQ==}
+    peerDependencies:
+      tailwindcss: '*'
+    dependencies:
+      '@types/lodash.foreach': 4.5.9
+      '@types/lodash.get': 4.4.9
+      '@types/lodash.omit': 4.5.9
+      class-variance-authority: 0.7.0
+      clsx: 2.1.0
+      color: 4.2.3
+      deepmerge: 4.3.1
+      flat: 6.0.1
+      lodash.foreach: 4.5.0
+      lodash.get: 4.4.2
+      lodash.omit: 4.5.0
+      tailwindcss: 3.3.0(postcss@8.0.0)
+    dev: false
+
+  /@mochi-ui/theme@0.18.0(tailwindcss@3.3.0):
+    resolution: {integrity: sha512-2UTA+6ndbKXCuePF8VU3/z7IBYJcioakxNyXGA13IA+F0fpSUh5g41jkbx/Hv7AIkoCH7mJh5aCqeGhX7qp2Gw==}
     peerDependencies:
       tailwindcss: '*'
     dependencies:
@@ -1469,23 +1604,22 @@ packages:
       - tailwindcss
     dev: false
 
-  /@mochi-web3/connect-wallet-widget@0.0.12(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2):
-    resolution: {integrity: sha512-qSy+aiCymAizxZ8LWT3bAUIvBJyab722O7YjBzZa+rgL0E5j+Bu4Mhh1IJ2kUX74LftzR1ITeJSiZ/jwGEVn/w==}
+  /@mochi-web3/connect-wallet-widget@0.0.15(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2):
+    resolution: {integrity: sha512-EOrRDSWxTE+XPJ2muGjDVNLJx2HaYMc4U+SkHmvzrsVMr5Na+NgpuZIGWumgWRJoDFjAz7GimH6psRNwH0mu3w==}
     peerDependencies:
       react: ^18.2.0
       react-dom: ^18.2.0
     dependencies:
-      '@mochi-ui/badge': 0.3.5(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
-      '@mochi-ui/button': 0.4.16(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
-      '@mochi-ui/dropdown': 0.2.7(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
+      '@mochi-ui/badge': 0.3.6(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
+      '@mochi-ui/button': 0.4.17(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
+      '@mochi-ui/dropdown': 0.2.8(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
       '@mochi-ui/icons': 0.7.4(react-dom@18.0.0)(react@18.0.0)
-      '@mochi-ui/tabs': 0.2.7(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
-      '@mochi-ui/theme': 0.17.0(tailwindcss@3.3.0)
+      '@mochi-ui/tabs': 0.2.8(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
+      '@mochi-ui/theme': 0.18.0(tailwindcss@3.3.0)
       '@mochi-ui/typography': 0.1.1(react-dom@18.0.0)(react@18.0.0)
       '@solana/web3.js': 1.74.0
       '@walletconnect/sign-client': 2.10.6
       browser-string-hexer: 1.0.0
-      bs58: 5.0.0
       class-variance-authority: 0.7.0
       clsx: 2.1.0
       dlv: 1.1.3
@@ -1519,28 +1653,25 @@ packages:
       - zod
     dev: false
 
-  /@mochi-web3/login-widget@0.2.7(@types/react-dom@18.0.0)(@types/react@18.0.0)(ioredis@5.3.2)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2):
-    resolution: {integrity: sha512-qJ39uThHUBL6vB3gr18dJ0S9tSBZzLBNcx4M0PHEZyhN38tIYNDlj0Ub/k2oqBUF9nHIN4ph89kAmZiQ+eAmKA==}
+  /@mochi-web3/login-widget@0.2.10(@types/react-dom@18.0.0)(@types/react@18.0.0)(ioredis@5.3.2)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2):
+    resolution: {integrity: sha512-VafpX39K8on/oso+stI1ZZlWUtbuUB7Au8wFe07jrHk3JVSFMMNvwic4u5kTfjrl9XSA+IyLTT2tnICRGLlnBg==}
     peerDependencies:
       react: ^18.2.0
       react-dom: ^18.2.0
     dependencies:
       '@consolelabs/mochi-rest': 5.3.3
       '@consolelabs/mochi-ui': 17.0.3(@consolelabs/mochi-rest@5.3.3)(ioredis@5.3.2)
-      '@mochi-ui/button': 0.4.16(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
-      '@mochi-ui/dropdown': 0.2.7(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
-      '@mochi-ui/icon-button': 0.4.17(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
+      '@mochi-ui/button': 0.4.17(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
+      '@mochi-ui/dropdown': 0.2.8(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
+      '@mochi-ui/icon-button': 0.4.18(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
       '@mochi-ui/icons': 0.7.4(react-dom@18.0.0)(react@18.0.0)
-      '@mochi-ui/scroll-area': 0.0.6(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
-      '@mochi-ui/tabs': 0.2.7(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
-      '@mochi-ui/theme': 0.17.0(tailwindcss@3.3.0)
+      '@mochi-ui/scroll-area': 0.0.7(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
+      '@mochi-ui/tabs': 0.2.8(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
+      '@mochi-ui/theme': 0.18.0(tailwindcss@3.3.0)
       '@mochi-ui/typography': 0.1.1(react-dom@18.0.0)(react@18.0.0)
-      '@mochi-web3/connect-wallet-widget': 0.0.12(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2)
+      '@mochi-web3/connect-wallet-widget': 0.0.15(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2)
       '@radix-ui/react-dialog': 1.0.5(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)
-      '@solana/web3.js': 1.74.0
       '@uidotdev/usehooks': 2.4.1(react-dom@18.0.0)(react@18.0.0)
-      browser-string-hexer: 1.0.0
-      bs58: 5.0.0
       dlv: 1.1.3
       ethers: 5.7.2
       framer-motion: 10.18.0(react-dom@18.0.0)(react@18.0.0)
@@ -1804,7 +1935,6 @@ packages:
     dependencies:
       is-glob: 4.0.3
       micromatch: 4.0.5
-      napi-wasm: 1.1.0
     dev: false
     bundledDependencies:
       - napi-wasm
@@ -1865,14 +1995,14 @@ packages:
     requiresBuild: true
     optional: true
 
-  /@pythnetwork/client@2.21.0(@solana/web3.js@1.91.0):
+  /@pythnetwork/client@2.21.0(@solana/web3.js@1.91.1):
     resolution: {integrity: sha512-jqUuPLuVKRNUsZfwLuvK/MwnJ3LIrIxBNoz43xt0fjvVuH5QyTlz51ek76CkeKfCbomGKe41Vq7bvn8aqWVOGA==}
     peerDependencies:
       '@solana/web3.js': ^1.30.2
     dependencies:
       '@coral-xyz/anchor': 0.29.0
-      '@coral-xyz/borsh': 0.28.0(@solana/web3.js@1.91.0)
-      '@solana/web3.js': 1.91.0
+      '@coral-xyz/borsh': 0.28.0(@solana/web3.js@1.91.1)
+      '@solana/web3.js': 1.91.1
       buffer: 6.0.3
     transitivePeerDependencies:
       - bufferutil
@@ -2859,14 +2989,14 @@ packages:
     resolution: {integrity: sha512-N1ZhksgwD3OBlwTv3R6KFEcPojl/W4ElJOeCZdi+vuI5QmTFwLq3OFf2zd2ROpKvxFdgZ6hUpb0dx9bVNEwYCA==}
     dependencies:
       '@noble/curves': 1.2.0
-      '@noble/hashes': 1.3.3
+      '@noble/hashes': 1.3.2
       '@scure/base': 1.1.5
     dev: false
 
   /@scure/bip39@1.2.1:
     resolution: {integrity: sha512-Z3/Fsz1yr904dduJD0NpiyRHhRYHdcnyh73FZWiV+/qhWi83wNJ3NWolYqCEN+ZWsUz2TWwajJggcRE9r1zUYg==}
     dependencies:
-      '@noble/hashes': 1.3.3
+      '@noble/hashes': 1.3.2
       '@scure/base': 1.1.5
     dev: false
 
@@ -2875,7 +3005,7 @@ packages:
     engines: {node: '>= 10'}
     dependencies:
       '@solana/buffer-layout': 4.0.1
-      '@solana/web3.js': 1.91.0
+      '@solana/web3.js': 1.91.1
       bigint-buffer: 1.1.5
       bignumber.js: 9.1.2
     transitivePeerDependencies:
@@ -2891,7 +3021,7 @@ packages:
       buffer: 6.0.3
     dev: false
 
-  /@solana/spl-token@0.3.7(@solana/web3.js@1.91.0):
+  /@solana/spl-token@0.3.7(@solana/web3.js@1.91.1):
     resolution: {integrity: sha512-bKGxWTtIw6VDdCBngjtsGlKGLSmiu/8ghSt/IOYJV24BsymRbgq7r12GToeetpxmPaZYLddKwAz7+EwprLfkfg==}
     engines: {node: '>=16'}
     peerDependencies:
@@ -2899,7 +3029,7 @@ packages:
     dependencies:
       '@solana/buffer-layout': 4.0.1
       '@solana/buffer-layout-utils': 0.2.0
-      '@solana/web3.js': 1.91.0
+      '@solana/web3.js': 1.91.1
       buffer: 6.0.3
     transitivePeerDependencies:
       - bufferutil
@@ -2932,8 +3062,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@solana/web3.js@1.91.0:
-    resolution: {integrity: sha512-iqOL9RjNra0TM9BbQWxBRUcZUiNmCJJO+vXLp0GiELUJhbNAoE/K6OV6s+gNEsC13dslvKtfA4mmzRnZNWXtIQ==}
+  /@solana/web3.js@1.91.1:
+    resolution: {integrity: sha512-cPgjZXm688oM9cULvJ8u2VH6Qp5rvptE1N1VODVxn2mAbpZsWrvWNPjmASkMYT/HzyrtqFkPvFdSHg8Xjt7aQA==}
     dependencies:
       '@babel/runtime': 7.24.0
       '@noble/curves': 1.3.0
@@ -3854,10 +3984,6 @@ packages:
       safe-buffer: 5.2.1
     dev: false
 
-  /base-x@4.0.0:
-    resolution: {integrity: sha512-FuwxlW4H5kh37X/oW59pwTzzTKRzfrrQwhmyspRM7swOEZcHtDZSCt45U6oKgtuFE+WYPblePMVIPR4RZrh/hw==}
-    dev: false
-
   /base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
     dev: false
@@ -4089,7 +4215,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001597
-      electron-to-chromium: 1.4.702
+      electron-to-chromium: 1.4.704
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.23.0)
     dev: true
@@ -4098,12 +4224,6 @@ packages:
     resolution: {integrity: sha512-Ok3Wdf5vOIlBrgCvTq96gBkJw+JUEzdBgyaza5HLtPm7yTHkjRy8+JzNyHF7BHa0bNWOQIp3m5YF0nnFcOIKLw==}
     dependencies:
       base-x: 3.0.9
-    dev: false
-
-  /bs58@5.0.0:
-    resolution: {integrity: sha512-r+ihvQJvahgYT50JD05dyJNKlmmSlMoOGwn1lCcEzanPglg7TxYjioQUYehQ9mAR/+hOSd2jRc/Z2y5UxBymvQ==}
-    dependencies:
-      base-x: 4.0.0
     dev: false
 
   /buffer-layout@1.2.2:
@@ -4649,8 +4769,8 @@ packages:
   /eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  /electron-to-chromium@1.4.702:
-    resolution: {integrity: sha512-LYLXyEUsZ3nNSwiOWjI88N1PJUAMU2QphQSgGLVkFnb3FxZxNui2Vzi2PaKPgPWbsWbZstZnh6BMf/VQJamjiQ==}
+  /electron-to-chromium@1.4.704:
+    resolution: {integrity: sha512-OK01+86Qvby1V6cTiowVbhp25aX4DLZnwar+NocAOXdzKAByd+jq5156bmo4kHwevWMknznW18Y/Svfk2dU91A==}
     dev: true
 
   /elliptic@6.5.4:
@@ -5354,7 +5474,6 @@ packages:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
-    requiresBuild: true
 
   /function-bind@1.1.2:
     resolution: {integrity: sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==}
@@ -6773,10 +6892,6 @@ packages:
     hasBin: true
     dev: false
 
-  /napi-wasm@1.1.0:
-    resolution: {integrity: sha512-lHwIAJbmLSjF9VDRm9GoVOy9AGp3aIvkjv+Kvz9h16QR3uSVYH78PNQUnT2U4X53mhlnV2M7wrhibQ3GHicDmg==}
-    dev: false
-
   /natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
     dev: true
@@ -7237,10 +7352,10 @@ packages:
       postcss: ^8.2.14
     dependencies:
       postcss: 8.0.0
-      postcss-selector-parser: 6.0.15
+      postcss-selector-parser: 6.0.16
 
-  /postcss-selector-parser@6.0.15:
-    resolution: {integrity: sha512-rEYkQOMUCEMhsKbK66tbEU9QVIxbhN18YiniAwA7XQYTVBqrBy+P2p5JcdqsHgKM2zWylp8d7J6eszocfds5Sw==}
+  /postcss-selector-parser@6.0.16:
+    resolution: {integrity: sha512-A0RVJrX+IUkVZbW3ClroRWurercFhieevHB38sr2+l9eUClMqome3LmEmnhlNy+5Mr2EYN6B2Kaw9wYdd+VHiw==}
     engines: {node: '>=4'}
     dependencies:
       cssesc: 3.0.0
@@ -7990,7 +8105,7 @@ packages:
       postcss-js: 4.0.1(postcss@8.0.0)
       postcss-load-config: 3.1.4(postcss@8.0.0)
       postcss-nested: 6.0.0(postcss@8.0.0)
-      postcss-selector-parser: 6.0.15
+      postcss-selector-parser: 6.0.16
       postcss-value-parser: 4.2.0
       quick-lru: 5.1.1
       resolve: 1.22.8
