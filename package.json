@@ -14,6 +14,7 @@
     "@mochi-ui/theme": "^0.17.0",
     "@mochi-web3/login-widget": "^0.2.11",
     "@radix-ui/react-slider": "^1.1.2",
+    "@semantic-release/git": "^10.0.1",
     "next": "14.1.3",
     "react": "^18",
     "react-dom": "^18",
