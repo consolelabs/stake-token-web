@@ -10,10 +10,11 @@ import {
   DropdownMenuPortal,
 } from "@mochi-ui/core";
 import { useLoginWidget } from "@mochi-web3/login-widget";
-import Link from "next/link";
 import { ReactNode } from "react";
 import { version as appVersion } from "../package.json";
 import { utils } from "@consolelabs/mochi-formatter";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/constants/routes";
 
 export default function ProfileDropdown({
   children,
@@ -22,7 +23,8 @@ export default function ProfileDropdown({
   children?: ReactNode;
   className?: string;
 }) {
-  const { isLoggedIn, profile } = useLoginWidget();
+  const { isLoggedIn, profile, logout } = useLoginWidget();
+  const { push } = useRouter();
 
   let triggerRender = null;
   if (children) {
@@ -56,9 +58,15 @@ export default function ProfileDropdown({
             bottom: 32,
           }}
         >
-          <Link href="#">
-            <DropdownMenuItem hasPaddingLeft>Logout</DropdownMenuItem>
-          </Link>
+          <DropdownMenuItem
+            hasPaddingLeft
+            onClick={() => {
+              logout();
+              push(ROUTES.HOME);
+            }}
+          >
+            Logout
+          </DropdownMenuItem>
           <DropdownMenuSeparator className="hidden lg:flex" />
           <DropdownMenuSeparator className="lg:hidden !mt-auto" />
           <DropdownMenuLabel className="flex flex-col">
