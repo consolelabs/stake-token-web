@@ -19,11 +19,10 @@ const Auth = () => {
         <CheckCircleHalfColoredLine className="w-10 h-10 text-success-solid" />
       </div>
       <p className="text-2xl sm:text-3.5xl sm:leading-9 font-semibold text-text-primary">
-        You&apos;re already logged in.
+        You&apos;re logged in.
       </p>
       <p className="text-base sm:text-lg text-text-primary">
-        Continue setting up Tono Bot for your community by going back to your
-        Discord server.
+        You can safely turn off this page
       </p>
     </div>
   );
