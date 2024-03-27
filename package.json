@@ -1,6 +1,6 @@
 {
   "name": "stake-token",
-  "version": "1.1.0-rc.1",
+  "version": "1.1.0-rc.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@consolelabs/mochi-formatter": "^20.0.5",
+    "@dwarvesf/react-hooks": "^0.8.2",
     "@mochi-ui/core": "^0.13.4",
     "@mochi-ui/icons": "^0.7.4",
     "@mochi-ui/theme": "^0.17.0",
