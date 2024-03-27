@@ -4,6 +4,7 @@ import { Footer } from "@/components/footer";
 import { LoginPopover } from "@/components/login-popover";
 import { Logo } from "@/components/logo";
 import ProfileDropdown from "@/components/profile-dropdown";
+import { FixedStakeModal } from "@/components/stake/fixed/fixed-stake-modal";
 import { ROUTES } from "@/constants/routes";
 import {
   Badge,
@@ -26,10 +27,22 @@ import { useLoginWidget } from "@mochi-web3/login-widget";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense, useState } from "react";
+import { useDisclosure } from "@dwarvesf/react-hooks";
+import { FlexibleStakeModal } from "@/components/stake/flexible/flexible-stake-modal";
 
 const Overview = () => {
   const { isLoggedIn } = useLoginWidget();
   const [showInfo, setShowInfo] = useState(false);
+  const {
+    isOpen: isOpenFixedStakeModal,
+    onOpenChange: onOpenChangeFixedStakeModal,
+    onOpen: onOpenFixedStakeModal,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenFlexibleStakeModal,
+    onOpenChange: onOpenChangeFlexibleStakeModal,
+    onOpen: onOpenFlexibleStakeModal,
+  } = useDisclosure();
 
   return (
     <div className="overflow-y-auto h-[calc(100vh-56px)]">
@@ -134,11 +147,13 @@ const Overview = () => {
                 },
               },
               action: (
-                <Link href={ROUTES.EARN.FLEXIBLE_YIELD}>
-                  <Button size="lg" className="w-full">
-                    Stake
-                  </Button>
-                </Link>
+                <Button
+                  size="lg"
+                  className="w-full"
+                  onClick={onOpenFlexibleStakeModal}
+                >
+                  Stake
+                </Button>
               ),
             },
             {
@@ -163,11 +178,13 @@ const Overview = () => {
                 },
               },
               action: (
-                <Link href={ROUTES.EARN.FIXED_YIELD}>
-                  <Button size="lg" className="w-full">
-                    Stake
-                  </Button>
-                </Link>
+                <Button
+                  size="lg"
+                  className="w-full"
+                  onClick={onOpenFixedStakeModal}
+                >
+                  Stake
+                </Button>
               ),
             },
             {
@@ -371,9 +388,7 @@ const Overview = () => {
               </>
             ),
             action: (
-              <Link href={ROUTES.EARN.FLEXIBLE_YIELD}>
-                <Button>Stake tokens</Button>
-              </Link>
+              <Button onClick={onOpenFlexibleStakeModal}>Stake tokens</Button>
             ),
           },
           {
@@ -434,6 +449,14 @@ const Overview = () => {
         ))}
       </div>
       <Footer />
+      <FixedStakeModal
+        open={isOpenFixedStakeModal}
+        onOpenChange={onOpenChangeFixedStakeModal}
+      />
+      <FlexibleStakeModal
+        open={isOpenFlexibleStakeModal}
+        onOpenChange={onOpenChangeFlexibleStakeModal}
+      />
     </div>
   );
 };
