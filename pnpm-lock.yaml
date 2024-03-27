@@ -8,6 +8,9 @@ dependencies:
   '@consolelabs/mochi-formatter':
     specifier: ^20.0.5
     version: 20.0.5(@consolelabs/mochi-rest@5.3.3)(ioredis@5.3.2)
+  '@dwarvesf/react-hooks':
+    specifier: ^0.8.2
+    version: 0.8.2(react-dom@18.0.0)(react@18.0.0)
   '@mochi-ui/core':
     specifier: ^0.13.4
     version: 0.13.4(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
