@@ -26,9 +26,10 @@ import {
 import { useLoginWidget } from "@mochi-web3/login-widget";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useDisclosure } from "@dwarvesf/react-hooks";
 import { FlexibleStakeModal } from "@/components/stake/flexible/flexible-stake-modal";
+import { getAllPoolAddresses } from "@/services";
 
 const Overview = () => {
   const { isLoggedIn } = useLoginWidget();
@@ -43,6 +44,18 @@ const Overview = () => {
     onOpenChange: onOpenChangeFlexibleStakeModal,
     onOpen: onOpenFlexibleStakeModal,
   } = useDisclosure();
+
+  useEffect(() => {
+    async function startFetching() {
+      const poolAddresses = await getAllPoolAddresses();
+      console.log("pool addresses: ", poolAddresses);
+    }
+    let ignore = false;
+    startFetching();
+    return () => {
+      ignore = true;
+    }
+  }, []);
 
   return (
     <div className="overflow-y-auto h-[calc(100vh-56px)]">
