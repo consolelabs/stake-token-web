@@ -74,7 +74,7 @@ export const StakeInput = (props: Props) => {
 
   return (
     <div className="rounded-xl bg-background-level2 p-3 space-y-3">
-      <div className="flex items-center justify-between min-h-[34px] flex-col space-y-1 sm:flex-row sm:space-y-0">
+      <div className="flex items-center justify-between min-h-[34px]">
         <Typography level="h9" color="textSecondary">
           You’re staking
         </Typography>
@@ -174,7 +174,7 @@ export const StakeInput = (props: Props) => {
             </Button>
           </div>
         </div>
-        <div className="flex items-center justify-between flex-col sm:flex-row">
+        <div className="flex items-center justify-between">
           <Typography className="!text-[13px] text-text-tertiary">
             ≈ $0.00 USD
           </Typography>
