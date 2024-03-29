@@ -13,6 +13,8 @@ import { FixedStakingCard } from "@/components/overview/FixedStakingCard";
 import { NFTCard } from "@/components/overview/NFTCard";
 import { Suspense, useEffect, useState } from "react";
 import { getAllPoolAddresses } from "@/services";
+import { useDisclosure } from "@dwarvesf/react-hooks";
+import { FlexibleStakeModal } from "@/components/stake/flexible/flexible-stake-modal";
 
 const Overview = () => {
   const { isLoggedIn } = useLoginWidget();
