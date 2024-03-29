@@ -23,10 +23,16 @@ export default function ProfileDropdown({
   children?: ReactNode;
   className?: string;
 }) {
-  const { isLoggedIn, profile, logout } = useLoginWidget();
+  const { isLoggedIn, profile, logout, wallets } = useLoginWidget();
   const { push } = useRouter();
 
   let triggerRender = null;
+  
+  if (wallets?.length && wallets?.[0].connectionStatus === "connected") {
+    const { provider } = wallets[0].providers[0];
+    console.log("current provider: ", provider);
+    console.log("current provider has getSigner method: ", provider?.getSigner);
+  }
   if (children) {
     triggerRender = children;
   } else {
