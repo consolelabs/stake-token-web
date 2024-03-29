@@ -16,14 +16,20 @@ export interface PoolInfo {
 }
 
 // TODO: should refactor this
-const BASE_PROVIDER_RPC = process.env.BASE_PROVIDER_RPC as string;
-const DEPLOYER_WALLET_KEY = process.env.BASE_PROVIDER_RPC as string;
-const FACTORY_ADDRESS = process.env.FACTORY_ADDRESS as string;
-const ICY_TOKEN_ADDRESS = process.env.ICY_TOKEN_ADDRESS as string;
+const BASE_PROVIDER_RPC = process.env.NEXT_PUBLIC_BASE_PROVIDER_RPC as string;
+const DEPLOYER_WALLET_KEY = process.env.NEXT_PUBLIC_DEPLOYER_WALLET_KEY as string;
+const FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FACTORY_ADDRESS as string;
+const ICY_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_ICY_TOKEN_ADDRESS as string;
 
 // connect to Base RPC Provider
 const provider = new ethers.providers.JsonRpcProvider(BASE_PROVIDER_RPC);
 const deployerSigner = new ethers.Wallet(DEPLOYER_WALLET_KEY, provider);
+let userSigner: ethers.Wallet;
+
+
+export const setUserSigner = (signer: ethers.Wallet) => {
+  userSigner = signer;
+}
 
 // instantiate StakingPoolFactory contract
 const factoryContract = StakingPoolFactory__factory.connect(
@@ -43,12 +49,20 @@ export const getPoolContractByAddress = (address: string): StakingPool => {
 }
 
 // TODO: update to sign user's metamask popup instead of using deployerSigner here
-export const depositToStakingPool = async (poolAddress: string, amount: number) => {
-  const poolContract = StakingPool__factory.connect(poolAddress, deployerSigner);
-  const amountWithDecimal = BigInt(amount) * BigInt(1000000000000000000);
-  const tx = await poolContract.deposit(amountWithDecimal);
-  await tx.wait();
-  console.log("Deposit TX success: ", tx.hash);
+export const depositToStakingPool = async (poolAddress: string, amount: number, userSigner: ethers.Wallet) => {
+  if (userSigner) {
+    throw Error("Must connect EVM wallet first"); // should handle error properly at UI component
+  }
+  try {
+    const poolContract = StakingPool__factory.connect(poolAddress, userSigner);
+    const amountWithDecimal = BigInt(amount) * BigInt(1000000000000000000);
+    const tx = await poolContract.deposit(amountWithDecimal);
+    await tx.wait();
+    console.log("Deposit TX success: ", tx.hash);
+  } catch (error) {
+    console.error("Failed to deposit with error: ", error);
+    throw error;
+  }
 }
 
 // TODO: implement formula to calculate realtime APR
