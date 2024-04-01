@@ -1,9 +1,10 @@
 import { Avatar, Button, Switch, Tooltip, Typography } from "@mochi-ui/core";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import * as Slider from "@radix-ui/react-slider";
 import clsx from "clsx";
 import { utils } from "@consolelabs/mochi-formatter";
 import { TokenAmount, formatTokenAmount } from "@/utils/number";
+import { getAvailableStakingTokenBalance } from "@/services";
 
 interface Props {
   amount: TokenAmount;
@@ -13,7 +14,7 @@ interface Props {
 export const StakeInput = (props: Props) => {
   const { amount, setAmount } = props;
   const [percent, setPercent] = useState(0);
-  const balance = 23667;
+  const [balance, setBalance] = useState(0);
 
   const onMaxAmount = () => {
     setPercent(100);
@@ -71,6 +72,14 @@ export const StakeInput = (props: Props) => {
     );
     setPercent(percent);
   };
+
+  useEffect(() => {
+    const getBalance = async () => {
+      const balance = await getAvailableStakingTokenBalance("");
+      setBalance(balance);
+    };
+    getBalance();
+  }, []);
 
   return (
     <div className="rounded-xl bg-background-level2 p-3 space-y-3">
