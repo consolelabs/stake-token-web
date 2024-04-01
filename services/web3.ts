@@ -23,7 +23,9 @@ export const ContractAddress = {
 // connect to Base RPC Provider
 let userSigner: ethers.Wallet;
 let icyTokenContract: IcyToken;
-const provider = new ethers.providers.JsonRpcProvider(NEXT_PUBLIC_BASE_PROVIDER_RPC as string);
+const provider = new ethers.providers.JsonRpcProvider(
+  NEXT_PUBLIC_BASE_PROVIDER_RPC as string
+);
 // const deployerSigner = new ethers.Wallet(NEXT_PUBLIC_DEPLOYER_WALLET_KEY as string, provider);
 
 export const setUserSigner = (signer: ethers.Wallet) => {
@@ -34,8 +36,11 @@ const initializeIcyTokenContract = () => {
   if (!userSigner) {
     return;
   }
-  icyTokenContract = IcyToken__factory.connect(ContractAddress.IcyToken, userSigner);
-}
+  icyTokenContract = IcyToken__factory.connect(
+    ContractAddress.IcyToken,
+    userSigner
+  );
+};
 
 export const getStakingPoolByAddress = (address: string): StakingPool => {
   const poolContract = StakingPool__factory.connect(address, userSigner);
@@ -88,7 +93,7 @@ export const getAvailableStakingTokenBalance = async (_poolAddress: string) => {
   if (!icyTokenContract) {
     initializeIcyTokenContract();
   }
-  const value = await Promise.resolve(10);
+  const value = await Promise.resolve(23667);
   return value;
 };
 
