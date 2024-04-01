@@ -26,7 +26,7 @@ import {
 import { useLoginWidget } from "@mochi-web3/login-widget";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useDisclosure } from "@dwarvesf/react-hooks";
 import { FlexibleStakeModal } from "@/components/stake/flexible/flexible-stake-modal";
 

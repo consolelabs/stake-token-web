@@ -27,8 +27,8 @@ dependencies:
     specifier: ^0.17.0
     version: 0.17.0(tailwindcss@3.3.0)
   '@mochi-web3/login-widget':
-    specifier: ^0.2.11
-    version: 0.2.11(@types/react-dom@18.0.0)(@types/react@18.0.0)(ioredis@5.3.2)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2)
+    specifier: ^0.2.14
+    version: 0.2.14(@types/react-dom@18.0.0)(@types/react@18.0.0)(ioredis@5.3.2)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2)
   '@radix-ui/react-slider':
     specifier: ^1.1.2
     version: 1.1.2(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)
@@ -1626,8 +1626,8 @@ packages:
       - tailwindcss
     dev: false
 
-  /@mochi-web3/connect-wallet-widget@0.0.15(@types/react-dom@18.0.0)(@types/react@18.0.0)(ioredis@5.3.2)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2):
-    resolution: {integrity: sha512-EOrRDSWxTE+XPJ2muGjDVNLJx2HaYMc4U+SkHmvzrsVMr5Na+NgpuZIGWumgWRJoDFjAz7GimH6psRNwH0mu3w==}
+  /@mochi-web3/connect-wallet-widget@0.2.1(@types/react-dom@18.0.0)(@types/react@18.0.0)(ioredis@5.3.2)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2):
+    resolution: {integrity: sha512-m/bBK+AmWw941pwdLbzyovvE7uwwQDS2WGf7KCTFa2z7sYx7tqYmw5R+p3PBfC874y7OQvYiBM8Lcn4tpc8ixQ==}
     peerDependencies:
       react: ^18.2.0
       react-dom: ^18.2.0
@@ -1676,8 +1676,8 @@ packages:
       - zod
     dev: false
 
-  /@mochi-web3/login-widget@0.2.11(@types/react-dom@18.0.0)(@types/react@18.0.0)(ioredis@5.3.2)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2):
-    resolution: {integrity: sha512-RN/jtJe3wZ5SNncJNy+thR+2p89kOvHFENZkSZdPF4fIDOgdpPWQHfPNDW5JPlNndDNFevAdWefJcqDIw3VkXQ==}
+  /@mochi-web3/login-widget@0.2.14(@types/react-dom@18.0.0)(@types/react@18.0.0)(ioredis@5.3.2)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2):
+    resolution: {integrity: sha512-ygiJHSu4BTbqV/Y+3q8FcN03Qi/xNdB9ulsHm/A5aR9pH3sxLBVACFJGTwzzuOXml89uDTEPrqVS+7XS+Klt8Q==}
     peerDependencies:
       react: ^18.2.0
       react-dom: ^18.2.0
@@ -1692,7 +1692,7 @@ packages:
       '@mochi-ui/tabs': 0.2.8(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)
       '@mochi-ui/theme': 0.18.0(tailwindcss@3.3.0)
       '@mochi-ui/typography': 0.1.1(react-dom@18.0.0)(react@18.0.0)
-      '@mochi-web3/connect-wallet-widget': 0.0.15(@types/react-dom@18.0.0)(@types/react@18.0.0)(ioredis@5.3.2)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2)
+      '@mochi-web3/connect-wallet-widget': 0.2.1(@types/react-dom@18.0.0)(@types/react@18.0.0)(ioredis@5.3.2)(react-dom@18.0.0)(react@18.0.0)(tailwindcss@3.3.0)(typescript@5.0.2)
       '@radix-ui/react-dialog': 1.0.5(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0)(react@18.0.0)
       '@uidotdev/usehooks': 2.4.1(react-dom@18.0.0)(react@18.0.0)
       dlv: 1.1.3
