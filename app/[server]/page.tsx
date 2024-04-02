@@ -8,10 +8,10 @@ import { Button, IconButton, TopBar, Typography } from "@mochi-ui/core";
 import { EyeHiddenSolid, EyeShowSolid } from "@mochi-ui/icons";
 import { useLoginWidget } from "@mochi-web3/login-widget";
 import Image from "next/image";
+import { Suspense, useState } from "react";
 import { FlexibleStakingCard } from "@/components/overview/FlexibleStakingCard";
 import { FixedStakingCard } from "@/components/overview/FixedStakingCard";
 import { NFTCard } from "@/components/overview/NFTCard";
-import { Suspense, useState } from "react";
 
 const Overview = () => {
   const { isLoggedIn } = useLoginWidget();
