@@ -3,24 +3,18 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import * as Slider from "@radix-ui/react-slider";
 import clsx from "clsx";
 import { utils } from "@consolelabs/mochi-formatter";
-import { useLoginWidget } from "@mochi-web3/login-widget";
 import { TokenAmount, formatTokenAmount } from "@/utils/number";
-// import { getAvailableStakingTokenBalance } from "@/services";
-
-const ICY_ABI = "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]";
 
 interface Props {
   amount: TokenAmount;
+  balance: number;
   setAmount: Dispatch<SetStateAction<TokenAmount>>;
 }
 
 export const StakeInput = (props: Props) => {
-  const { amount, setAmount } = props;
+  const {amount, setAmount, balance} = props;
   const [percent, setPercent] = useState(0);
-  const [balance, setBalance] = useState(0);
   
-  const { wallets } = useLoginWidget();
-
   const onMaxAmount = () => {
     setPercent(100);
     setAmount(formatTokenAmount(balance));
@@ -77,27 +71,6 @@ export const StakeInput = (props: Props) => {
     );
     setPercent(percent);
   };
-
-  useEffect(() => {
-    const getBalance = async () => {
-      console.log("wallets: ", wallets);
-      let provider = null;
-      if (wallets?.length && wallets?.[0].connectionStatus === "connected") {
-        provider = wallets[0].providers[0];
-        const balance = await provider.read({ 
-          abi: ICY_ABI, 
-          method: "balanceOf", 
-          args: ["0x030c5a66341c0EDdC771F7aae79ABCA58aDE4c91"],
-          to: "0xF289E3b222dd42B185b7E335fA3C5bd6D132441D",
-          from: "0x030c5a66341c0EDdC771F7aae79ABCA58aDE4c91",
-        });
-        console.log("balanceOf response", balance);
-      }
-      // const balance = await getAvailableStakingTokenBalance("");
-      setBalance(6969);
-    };
-    getBalance();
-  }, [wallets]);
 
   return (
     <div className="rounded-xl bg-background-level2 p-3 space-y-3">

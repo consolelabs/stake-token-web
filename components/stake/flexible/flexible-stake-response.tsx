@@ -7,6 +7,10 @@ import {
 } from "@mochi-ui/core";
 import { CheckCircleHalfColoredLine, CheckLine } from "@mochi-ui/icons";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useLoginWidget } from "@mochi-web3/login-widget";
+import { StakingPool } from "@/services/contracts/Pool";
+import { formatUnixTimestampToDateTime } from "@/utils/datetime";
 
 interface Props {
   onClose: () => void;
@@ -14,6 +18,32 @@ interface Props {
 
 export const FlexibleStakeResponse = (props: Props) => {
   const { onClose } = props;
+  const [rewardPeriodMetadata, setRewardPeriodMetadata] = useState<{ startTime: string, finishTime: string }>()
+  const {wallets, getProviderByAddress} = useLoginWidget();
+
+  const stakeDate = formatUnixTimestampToDateTime(Math.floor(Date.now() / 1000));
+
+  useEffect(() => {
+    const getPoolContract = async () => {
+      const connected = wallets.find(w => w.connectionStatus === "connected");
+      if (!connected) {
+        console.error("No wallet connected.");
+        return
+      }
+      const address = connected?.address;
+      const provider = getProviderByAddress(address || "");
+      if (!provider) {
+        console.error("No provider connected.");
+        return
+      }
+      const pool = StakingPool.getInstance("ICY_ICY", provider);
+      pool.setSenderAddress(address);
+
+      // get reward perio metadata (startTime, finishTime)
+      await pool.getStakingPeriodMetadata();
+    };
+    getPoolContract();
+  }, [getProviderByAddress, wallets]);
 
   return (
     <>
@@ -43,7 +73,7 @@ export const FlexibleStakeResponse = (props: Props) => {
               </div>
               <Typography level="h9">Stake date</Typography>
             </div>
-            <Typography level="p5">08/03/2024 17:05</Typography>
+            <Typography level="p5">{stakeDate}</Typography>
           </div>
           <div className="flex items-center justify-between relative">
             <div className="absolute -top-7 left-3 -translate-x-1/2 h-7 border-r border-neutral-soft-active" />
