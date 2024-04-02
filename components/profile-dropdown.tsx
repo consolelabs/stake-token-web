@@ -23,7 +23,7 @@ export default function ProfileDropdown({
   children?: ReactNode;
   className?: string;
 }) {
-  const { isLoggedIn, profile, logout, wallets } = useLoginWidget();
+  const { isLoggedIn, profile, logout } = useLoginWidget();
   const { push } = useRouter();
 
   let triggerRender = null;
