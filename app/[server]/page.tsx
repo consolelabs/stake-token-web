@@ -11,24 +11,11 @@ import Image from "next/image";
 import { FlexibleStakingCard } from "@/components/overview/FlexibleStakingCard";
 import { FixedStakingCard } from "@/components/overview/FixedStakingCard";
 import { NFTCard } from "@/components/overview/NFTCard";
-import { Suspense, useEffect, useState } from "react";
-import { getAllPoolAddresses } from "@/services";
+import { Suspense, useState } from "react";
 
 const Overview = () => {
   const { isLoggedIn } = useLoginWidget();
   const [showInfo, setShowInfo] = useState(false);
-
-  useEffect(() => {
-    async function startFetching() {
-      const poolAddresses = await getAllPoolAddresses();
-      console.log("pool addresses: ", poolAddresses);
-    }
-    let ignore = false;
-    startFetching();
-    return () => {
-      ignore = true;
-    };
-  }, []);
 
   return (
     <div className="overflow-y-auto h-[calc(100vh-56px)]">
