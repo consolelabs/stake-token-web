@@ -5,14 +5,15 @@ import { LoginPopover } from "@/components/login-popover";
 import { Logo } from "@/components/logo";
 import { NFTList } from "@/components/nft/nft-list";
 import ProfileDropdown from "@/components/profile-dropdown";
-import { Button, Separator, Table, TopBar, Typography } from "@mochi-ui/core";
+import { Button, Separator, TopBar, Typography, toast } from "@mochi-ui/core";
 import { ArrowTopRightLine } from "@mochi-ui/icons";
 import { useLoginWidget } from "@mochi-web3/login-widget";
 import Image from "next/image";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 
 const NFT = () => {
   const { isLoggedIn } = useLoginWidget();
+  const [state, setState] = useState<"init" | "minted">("init");
 
   return (
     <div className="overflow-y-auto h-[calc(100vh-56px)]">
@@ -107,7 +108,31 @@ const NFT = () => {
               ))}
             </div>
             {isLoggedIn ? (
-              <Button size="lg">Mint (2)</Button>
+              state === "minted" ? (
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    setState("init");
+                  }}
+                >
+                  Claim
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    toast({
+                      scheme: "success",
+                      title: "Congratulations! Mint succeeded!",
+                      description:
+                        "Claim your NFT and start using it to redeem rewards.",
+                    });
+                    setState("minted");
+                  }}
+                >
+                  Mint (2)
+                </Button>
+              )
             ) : (
               <Button size="lg">Login</Button>
             )}
