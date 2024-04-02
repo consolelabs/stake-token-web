@@ -16,6 +16,7 @@ import { FlexibleStakeModal } from "../stake/flexible/flexible-stake-modal";
 import { useState } from "react";
 import { useCountdown } from "@/hooks/useCountdown";
 import { useLoginWidget } from "@mochi-web3/login-widget";
+import { useFlexibleStaking } from "@/store/flexibleStaking";
 
 interface Props {
   hidden: boolean;
@@ -24,6 +25,7 @@ interface Props {
 export const FlexibleStakingCard = (props: Props) => {
   const { hidden } = props;
   const { isLoggedIn } = useLoginWidget();
+  const { balance, aprPercentage } = useFlexibleStaking();
   const { isOpen: isBoosting, onOpen: onBoost } = useDisclosure();
   const { isOpen: isAutoStaking, onOpenChange: onAutoStakingChange } =
     useDisclosure({
@@ -42,7 +44,6 @@ export const FlexibleStakingCard = (props: Props) => {
   const [claimableRewards, setClaimableRewards] = useState(356.7891);
   const data = isLoggedIn
     ? {
-        walletBalance: 0,
         walletBalanceInUsd: 0,
         totalStaked: 514.24,
         totalStakedInUsd: 769.86,
@@ -50,7 +51,6 @@ export const FlexibleStakingCard = (props: Props) => {
         claimableRewards,
       }
     : {
-        walletBalance: 0,
         walletBalanceInUsd: 0,
         totalStaked: 0,
         totalStakedInUsd: 0,
@@ -84,7 +84,7 @@ export const FlexibleStakingCard = (props: Props) => {
         title="ICY"
         description="Earn competitive returns by staking ICY tokens and NFTs. Fixed yield is achieved at maturity, but you can exit anytime at its current market price."
         highlightItems={[
-          { label: "Fixed APY", value: "28.7%" },
+          { label: "Fixed APY", value: `${aprPercentage}%` },
           { label: "TVL", value: "$2.02M" },
         ]}
         items={[
@@ -92,9 +92,7 @@ export const FlexibleStakingCard = (props: Props) => {
             label: "Wallet Balance",
             value: (
               <div className="flex items-center space-x-0.5">
-                <Typography level="h9">
-                  {utils.formatDigit({ value: data.walletBalance.toFixed(2) })}
-                </Typography>
+                <Typography level="h9">{balance.display}</Typography>
                 <Typography level="h9" color="textDisabled">
                   ICY
                 </Typography>

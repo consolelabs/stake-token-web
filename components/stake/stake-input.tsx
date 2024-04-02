@@ -1,23 +1,23 @@
 import { Avatar, Button, Switch, Tooltip, Typography } from "@mochi-ui/core";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import * as Slider from "@radix-ui/react-slider";
 import clsx from "clsx";
 import { utils } from "@consolelabs/mochi-formatter";
 import { TokenAmount, formatTokenAmount } from "@/utils/number";
 
 interface Props {
+  balance?: TokenAmount;
   amount: TokenAmount;
   setAmount: Dispatch<SetStateAction<TokenAmount>>;
 }
 
 export const StakeInput = (props: Props) => {
-  const { amount, setAmount } = props;
+  const { balance = { value: 0, display: "" }, amount, setAmount } = props;
   const [percent, setPercent] = useState(0);
-  const balance = 23667;
 
   const onMaxAmount = () => {
     setPercent(100);
-    setAmount(formatTokenAmount(balance));
+    setAmount(balance);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -57,7 +57,7 @@ export const StakeInput = (props: Props) => {
     setAmount(formattedAmount);
     const percent = Math.max(
       0,
-      Math.min(100, (formattedAmount.value / balance) * 100)
+      Math.min(100, (formattedAmount.value / balance.value) * 100)
     );
     setPercent(percent);
   };
@@ -67,7 +67,7 @@ export const StakeInput = (props: Props) => {
     setAmount(formattedAmount);
     const percent = Math.max(
       0,
-      Math.min(100, (formattedAmount.value / balance) * 100)
+      Math.min(100, (formattedAmount.value / balance.value) * 100)
     );
     setPercent(percent);
   };
@@ -118,16 +118,9 @@ export const StakeInput = (props: Props) => {
               className="relative flex w-full h-2 cursor-pointer items-center [&>span:last-child]:z-10"
               value={[percent]}
               onValueChange={(value) => {
-                console.log("Slider change");
                 const percent = value[0];
                 setPercent(percent);
-                setAmount(formatTokenAmount((balance * percent) / 100));
-              }}
-              onValueCommit={() => {
-                console.log("Slider commit");
-              }}
-              onClick={() => {
-                console.log("Slider click");
+                setAmount(formatTokenAmount((balance.value * percent) / 100));
               }}
               max={100}
               step={1}
@@ -153,9 +146,10 @@ export const StakeInput = (props: Props) => {
                       : "bg-background-level2"
                   )}
                   onClick={() => {
-                    console.log("click");
                     setPercent(milestone);
-                    setAmount(formatTokenAmount((balance * milestone) / 100));
+                    setAmount(
+                      formatTokenAmount((balance.value * milestone) / 100)
+                    );
                   }}
                 />
               </span>
@@ -182,7 +176,7 @@ export const StakeInput = (props: Props) => {
             Balance:{" "}
             <button onClick={onMaxAmount}>
               {utils.formatTokenDigit({
-                value: balance,
+                value: balance.value,
                 shorten: false,
                 fractionDigits: 2,
               })}{" "}

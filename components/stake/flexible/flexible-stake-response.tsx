@@ -7,6 +7,10 @@ import {
 } from "@mochi-ui/core";
 import { CheckCircleHalfColoredLine, CheckLine } from "@mochi-ui/icons";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useLoginWidget } from "@mochi-web3/login-widget";
+import { StakingPool } from "@/services/contracts/Pool";
+import { formatUnixTimestampToDateTime } from "@/utils/datetime";
 
 interface Props {
   onClose: () => void;
@@ -14,6 +18,37 @@ interface Props {
 
 export const FlexibleStakeResponse = (props: Props) => {
   const { onClose } = props;
+  const [rewardPeriodMetadata, setRewardPeriodMetadata] = useState<{ startTime: string, finishTime: string }>()
+  const {wallets, getProviderByAddress} = useLoginWidget();
+
+  const stakeDate = formatUnixTimestampToDateTime(Math.floor(Date.now() / 1000));
+
+  useEffect(() => {
+    const getPoolContract = async () => {
+      const connected = wallets.find(w => w.connectionStatus === "connected");
+      if (!connected) {
+        console.error("No wallet connected.");
+        return
+      }
+      const address = connected?.address;
+      const provider = getProviderByAddress(address || "");
+      if (!provider) {
+        console.error("No provider connected.");
+        return
+      }
+      const pool = StakingPool.getInstance("ICY_ICY", provider);
+      pool.setSenderAddress(address);
+
+      const periodStartTime = await pool.getPeriodStartDate();
+      if (!periodStartTime) console.error("failed to get periodStartTime");
+      
+      const periodFinishTime = await pool.getPeriodFinishDate();
+      if (!periodFinishTime) console.error("failed to get periodFinishTime");
+
+      setRewardPeriodMetadata({startTime: periodStartTime, finishTime: periodFinishTime});
+    };
+    getPoolContract();
+  }, [getProviderByAddress, wallets]);
 
   return (
     <>
@@ -43,7 +78,7 @@ export const FlexibleStakeResponse = (props: Props) => {
               </div>
               <Typography level="h9">Stake date</Typography>
             </div>
-            <Typography level="p5">08/03/2024 17:05</Typography>
+            <Typography level="p5">{stakeDate}</Typography>
           </div>
           <div className="flex items-center justify-between relative">
             <div className="absolute -top-7 left-3 -translate-x-1/2 h-7 border-r border-neutral-soft-active" />
@@ -53,7 +88,7 @@ export const FlexibleStakeResponse = (props: Props) => {
               </div>
               <Typography level="h9">Value date</Typography>
             </div>
-            <Typography level="p5">08/03/2024 07:00</Typography>
+            <Typography level="p5">{rewardPeriodMetadata?.startTime}</Typography>
           </div>
           <div className="flex items-center justify-between relative">
             <div className="absolute -top-7 left-3 -translate-x-1/2 h-7 border-r border-neutral-soft-active" />
@@ -63,7 +98,7 @@ export const FlexibleStakeResponse = (props: Props) => {
               </div>
               <Typography level="h9">Interest distribution date</Typography>
             </div>
-            <Typography level="p5">09/03/2025 07:00</Typography>
+            <Typography level="p5">{rewardPeriodMetadata?.finishTime}</Typography>
           </div>
         </div>
         <div className="flex items-center space-x-2">
