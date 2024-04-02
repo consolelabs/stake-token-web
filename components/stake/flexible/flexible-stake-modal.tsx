@@ -25,11 +25,12 @@ export const FlexibleStakeModal = (props: Props) => {
   const [state, setState] = useState<"init" | "approved" | "success">("init");
   const [poolContract, setPoolContract] = useState<StakingPool>();
   const [icyContract, setIcyContract] = useState<ERC20TokenInteraction>();
+  const [aprPercentage, setAprPercentage] = useState(0);
 
   const {wallets, getProviderByAddress} = useLoginWidget();
 
   useEffect(() => {
-    const getPoolContract = async () => {
+    const initializeContractInteraction = async () => {
       const connected = wallets.find(w => w.connectionStatus === "connected");
       if (!connected) {
         console.error("No wallet connected.");
@@ -45,10 +46,16 @@ export const FlexibleStakeModal = (props: Props) => {
       const icy = ERC20TokenInteraction.getInstance("ICY", provider)
       pool.setSenderAddress(address);
       icy.setSenderAddress(address);
+
+      // calculate APR here
+      const apr = await pool.calculateRealtimeAPR();
+      console.log("calculated APR: ", apr);
+
+      setAprPercentage(apr);
       setPoolContract(pool);
       setIcyContract(icy);
     };
-    getPoolContract();
+    initializeContractInteraction();
   }, [getProviderByAddress, wallets]);
 
   const handleOnStake = async (amount: number) => {
@@ -99,12 +106,14 @@ export const FlexibleStakeModal = (props: Props) => {
           )}
           {state === "init" && (
             <FlexibleStakeContent
+              flexibleAPR={aprPercentage}
               onApprove={handleOnApprove}
               onStake={handleOnStake}
             />
           )}
           {state === "approved" && (
             <FlexibleStakeContent
+            flexibleAPR={aprPercentage}
               onApprove={handleOnApprove}
               onStake={handleOnStake}
             />

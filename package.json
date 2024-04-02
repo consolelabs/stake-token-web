@@ -17,10 +17,11 @@
     "@mochi-ui/core": "^0.13.4",
     "@mochi-ui/icons": "^0.7.4",
     "@mochi-ui/theme": "^0.17.0",
-    "@mochi-web3/connect-wallet-widget": "^0.2.3",
-    "@mochi-web3/login-widget": "^0.2.16",
+    "@mochi-web3/connect-wallet-widget": "^0.2.4",
+    "@mochi-web3/login-widget": "^0.2.17",
     "@radix-ui/react-slider": "^1.1.2",
     "@semantic-release/git": "^10.0.1",
+    "bignumber.js": "^9.1.2",
     "clsx": "^2.1.0",
     "ethers": "5.7.2",
     "next": "14.1.3",
@@ -38,7 +39,6 @@
     "eslint-config-next": "14.1.3",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
-    "typechain": "^8.3.2",
     "typescript": "^5"
   }
 }

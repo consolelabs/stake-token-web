@@ -1,6 +1,6 @@
 import { TokenAmount, formatTokenAmount } from "@/utils/number";
 import { ChainProvider } from "@mochi-web3/connect-wallet-widget";
-import { BigNumberish } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
 
 const Abi = {
@@ -58,15 +58,17 @@ export class ERC20TokenInteraction {
 
   async getTokenBalance(): Promise<TokenAmount | undefined> {
     try {
-      const response: BigNumberish[] = await this.provider.read({ 
+      const response: BigNumber[] = await this.provider.read({ 
         abi: this.abi, 
         method: "balanceOf", 
         args: [this.sender],
         to: this.address,
         from: this.sender,
       });
-      if (!response?.length) return;
-      return this.getBigNumberValueByDecimals(response[0]);
+
+      if (response?.length && BigNumber.isBigNumber(response[0])) {
+        return this.getBigNumberValueByDecimals(response[0].toBigInt());
+      }
     } catch (error) {
       console.error(error);
       return;
@@ -75,18 +77,19 @@ export class ERC20TokenInteraction {
 
   async getAllowance(spenderAddress: string): Promise<TokenAmount | undefined> {
     try {
-      const response = await this.provider.read({ 
+      const response: [BigNumber] = await this.provider.read({ 
         abi: this.abi, 
         method: "allowance", 
         args: [this.sender, spenderAddress],
         to: this.address,
         from: this.sender,
       });
-      console.log("getAllowance: ", response);
-      // if (!response?.length) return;
-      // return this.getBigNumberValueByDecimals(response[0]);
+
+      if (response?.length && BigNumber.isBigNumber(response[0])) {
+        return this.getBigNumberValueByDecimals(response[0].toBigInt());
+      }
     } catch (error) {
-      console.error("error: ", error);
+      console.error("error when trying to get allowance: ", error);
       return;
     }
   }

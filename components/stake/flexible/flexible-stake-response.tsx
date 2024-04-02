@@ -39,8 +39,13 @@ export const FlexibleStakeResponse = (props: Props) => {
       const pool = StakingPool.getInstance("ICY_ICY", provider);
       pool.setSenderAddress(address);
 
-      // get reward perio metadata (startTime, finishTime)
-      await pool.getStakingPeriodMetadata();
+      const periodStartTime = await pool.getPeriodStartDate();
+      if (!periodStartTime) console.error("failed to get periodStartTime");
+      
+      const periodFinishTime = await pool.getPeriodFinishDate();
+      if (!periodFinishTime) console.error("failed to get periodFinishTime");
+
+      setRewardPeriodMetadata({startTime: periodStartTime, finishTime: periodFinishTime});
     };
     getPoolContract();
   }, [getProviderByAddress, wallets]);
@@ -83,7 +88,7 @@ export const FlexibleStakeResponse = (props: Props) => {
               </div>
               <Typography level="h9">Value date</Typography>
             </div>
-            <Typography level="p5">08/03/2024 07:00</Typography>
+            <Typography level="p5">{rewardPeriodMetadata?.startTime}</Typography>
           </div>
           <div className="flex items-center justify-between relative">
             <div className="absolute -top-7 left-3 -translate-x-1/2 h-7 border-r border-neutral-soft-active" />
@@ -93,7 +98,7 @@ export const FlexibleStakeResponse = (props: Props) => {
               </div>
               <Typography level="h9">Interest distribution date</Typography>
             </div>
-            <Typography level="p5">09/03/2025 07:00</Typography>
+            <Typography level="p5">{rewardPeriodMetadata?.finishTime}</Typography>
           </div>
         </div>
         <div className="flex items-center space-x-2">

@@ -6,21 +6,22 @@ import { useLoginWidget } from "@mochi-web3/login-widget";
 import { ERC20TokenInteraction } from "@/services/contracts/Token";
 import { PoolAddress } from "@/services/contracts/Pool";
 
-const flexibleAPR = 28.7;
+// const flexibleAPR = 28.7;
 
 interface Props {
+  flexibleAPR: number;
   onStake: (amount: number) => Promise<void>;
   onApprove: (alreadyApproved: boolean) => Promise<void>; // remove boolean args later
 }
 
 export const FlexibleStakeContent = (props: Props) => {
-  const { onStake, onApprove } = props;
+  const { onStake, onApprove, flexibleAPR } = props;
   const [amount, setAmount] = useState<TokenAmount>({
     value: 0,
     display: "",
   });
   const [balance, setBalance] = useState(0);
-  const [allowance, setAllowance] = useState(999999999);
+  const [allowance, setAllowance] = useState(0);
   const {wallets, getProviderByAddress} = useLoginWidget();
 
   useEffect(() => {
@@ -41,21 +42,21 @@ export const FlexibleStakeContent = (props: Props) => {
 
       // get available staking token balance
       const balance = await IcyToken.getTokenBalance();
-      if (!balance?.value) {
+      if (typeof balance?.value !== "number") {
         console.error("Cannot get wallet balance.");
         return;
       }
+      setBalance(balance?.value);
 
       // get allowance for current pool
-      await IcyToken.getAllowance(PoolAddress.POOL_ICY_ICY);
-      // console.log("current allowance: ", fetchedAllowance);
-      // if (!fetchedAllowance?.value) {
-      //   console.error("Cannot get pool allowance.");
-      //   return;
-      // }
-      // setAllowance(fetchedAllowance?.value);
-      setBalance(balance?.value);
+      const fetchedAllowance = await IcyToken.getAllowance(PoolAddress.POOL_ICY_ICY);
+      if (typeof fetchedAllowance?.value !== "number") {
+        console.error("Cannot get pool allowance.");
+        return;
+      }
+      setAllowance(fetchedAllowance?.value);
     };
+
     fetchBalanceAndAllowance();
   }, [getProviderByAddress, wallets]);
 
