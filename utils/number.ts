@@ -1,4 +1,5 @@
 import { utils } from "@consolelabs/mochi-formatter";
+import BigNumber from "bignumber.js";
 
 export type TokenAmount = {
   value: number;
@@ -17,4 +18,8 @@ export function formatTokenAmount(amount: string | number): TokenAmount {
     value: formatNumber,
     display: roundedAmount,
   };
+}
+
+export function getAmountWithDecimals(amount: number, decimals: number): BigNumber {
+  return (new BigNumber(10)).pow(decimals).multipliedBy(amount);
 }
