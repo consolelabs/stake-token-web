@@ -4,6 +4,7 @@ import Image from "next/image";
 import { PlusCircleSolid } from "@mochi-ui/icons";
 import { useLoginWidget } from "@mochi-web3/login-widget";
 import { utils } from "@consolelabs/mochi-formatter";
+import { useEffect, useState } from "react";
 
 interface Props {
   hidden: boolean;
@@ -31,6 +32,15 @@ export const NFTCard = (props: Props) => {
         totalStaked: 0,
         claimableRewards: 0,
       };
+
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <Card
