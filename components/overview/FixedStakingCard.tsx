@@ -13,7 +13,7 @@ import { utils } from "@consolelabs/mochi-formatter";
 import { useDisclosure } from "@dwarvesf/react-hooks";
 import { MinusLine, PlusCircleSolid, PlusLine } from "@mochi-ui/icons";
 import { FixedStakeModal } from "../stake/fixed/fixed-stake-modal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCountdown } from "@/hooks/useCountdown";
 import { useLoginWidget } from "@mochi-web3/login-widget";
 
@@ -55,6 +55,15 @@ export const FixedStakingCard = (props: Props) => {
         nftBoost: 0,
         claimableRewards: 0,
       };
+
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <>
