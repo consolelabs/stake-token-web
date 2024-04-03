@@ -12,10 +12,13 @@ import { Suspense, useState } from "react";
 import { FlexibleStakingCard } from "@/components/overview/FlexibleStakingCard";
 import { FixedStakingCard } from "@/components/overview/FixedStakingCard";
 import { NFTCard } from "@/components/overview/NFTCard";
+import { useFlexibleStaking } from "@/store/flexibleStaking";
+import { utils } from "@consolelabs/mochi-formatter";
 
 const Overview = () => {
   const { isLoggedIn } = useLoginWidget();
-  const [showInfo, setShowInfo] = useState(false);
+  const [showInfo, setShowInfo] = useState(true);
+  const { balance } = useFlexibleStaking();
 
   return (
     <div className="overflow-y-auto h-[calc(100vh-56px)]">
@@ -25,7 +28,7 @@ const Overview = () => {
             <Typography level="h3" fontWeight="lg" className="flex-1">
               You have{" "}
               <span className="text-primary-solid">
-                {showInfo ? 513.24 : "*****"}
+                {showInfo ? utils.formatTokenDigit(balance) : "*****"}
               </span>{" "}
               ICY and{" "}
               <span className="text-danger-solid">
