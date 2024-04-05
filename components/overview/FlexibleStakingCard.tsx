@@ -6,17 +6,19 @@ import {
   Typography,
   ValueChange,
   ValueChangeIndicator,
+  toast,
 } from "@mochi-ui/core";
 import { Card } from "./Card";
 import Image from "next/image";
 import { utils } from "@consolelabs/mochi-formatter";
 import { useDisclosure } from "@dwarvesf/react-hooks";
-import { MinusLine, PlusCircleSolid, PlusLine } from "@mochi-ui/icons";
+import { MinusLine, PlusCircleSolid, PlusLine, Spinner } from "@mochi-ui/icons";
 import { FlexibleStakeModal } from "../stake/flexible/flexible-stake-modal";
-import { useCountdown } from "@/hooks/useCountdown";
-import { useLoginWidget } from "@mochi-web3/login-widget";
-import { useFlexibleStaking } from "@/store/flexibleStaking";
+import { useFlexibleStaking } from "@/store/flexible-staking";
 import { useEffect, useState } from "react";
+import { Countdown } from "./Countdown";
+import { useTokenStaking } from "@/store/token-staking";
+import { retry } from "@/utils/retry";
 
 interface Props {
   hidden: boolean;
@@ -24,16 +26,20 @@ interface Props {
 
 export const FlexibleStakingCard = (props: Props) => {
   const { hidden } = props;
-  const { isLoggedIn } = useLoginWidget();
+  const { stakingTokens } = useTokenStaking();
   const {
     apr,
     balance,
     stakedAmount,
+    unclaimedRewards,
     poolStakedAmount,
-    earnedRewards,
+    nftBoost,
     tokenPrice,
     autoStaking,
+    finishTime,
+    poolContract,
     setValues,
+    updateValues,
   } = useFlexibleStaking();
   const { isOpen: isBoosting, onOpen: onBoost } = useDisclosure();
   const {
@@ -41,19 +47,94 @@ export const FlexibleStakingCard = (props: Props) => {
     onOpenChange: onOpenChangeFlexibleStakeModal,
     onOpen: onOpenFlexibleStakeModal,
   } = useDisclosure();
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [isUnstaking, setIsUnstaking] = useState(false);
 
-  // FIXME: mock data
-  const nftBoost = 0;
-  const { countDown, hours, minutes, seconds } = useCountdown(
-    isLoggedIn ? 10 : 0
-  );
+  const data = stakingTokens.find((each) => each.type === "flexible");
+
+  const onClaim = async () => {
+    if (!poolContract) return;
+    try {
+      setIsClaiming(true);
+      const txHash = await poolContract.claimReward();
+      if (!txHash) {
+        throw new Error("Failed to claim rewards");
+      }
+      // FIXME: retry to get updated values
+      const newUnclaimedRewards = await retry(
+        async () => {
+          const newUnclaimedRewards =
+            await poolContract.getRewardAvailableForClaim();
+          if (newUnclaimedRewards?.value !== unclaimedRewards) {
+            return newUnclaimedRewards?.value;
+          } else {
+            throw new Error("Something went wrong");
+          }
+        },
+        3000,
+        100
+      );
+      if (!newUnclaimedRewards && newUnclaimedRewards !== 0) {
+        throw new Error("Failed to get updated values");
+      }
+      await updateValues();
+    } catch (err: any) {
+      toast({
+        scheme: "danger",
+        title: "Error",
+        description:
+          typeof err.message === "string"
+            ? err.message
+            : "Failed to claim rewards",
+      });
+    } finally {
+      setIsClaiming(false);
+    }
+  };
+
+  const onUnstake = async () => {
+    if (!poolContract) return;
+    try {
+      setIsUnstaking(true);
+      const txHash = await poolContract.unstake();
+      if (!txHash) {
+        throw new Error("Failed to unstake");
+      }
+      // FIXME: retry to get updated values
+      const newStakedAmount = await retry(
+        async () => {
+          const newStakedAmount = await poolContract.getSenderStakedAmount();
+          if (newStakedAmount?.value !== stakedAmount) {
+            return newStakedAmount?.value;
+          } else {
+            throw new Error("Something went wrong");
+          }
+        },
+        3000,
+        100
+      );
+      if (!newStakedAmount && newStakedAmount !== 0) {
+        throw new Error("Failed to get updated values");
+      }
+      await updateValues();
+    } catch (err: any) {
+      toast({
+        scheme: "danger",
+        title: "Error",
+        description:
+          typeof err.message === "string" ? err.message : "Failed to unstake",
+      });
+    } finally {
+      setIsUnstaking(false);
+    }
+  };
 
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  if (!isClient) {
+  if (!isClient || !data) {
     return null;
   }
 
@@ -80,8 +161,8 @@ export const FlexibleStakingCard = (props: Props) => {
           </Tooltip>,
         ]}
         icon={<Image src="/ICY.png" alt="" width={24} height={24} />}
-        title="ICY"
-        description="Earn competitive returns by staking ICY tokens and NFTs. Fixed yield is achieved at maturity, but you can exit anytime at its current market price."
+        title={data.staking_token?.token_symbol}
+        description={data.description}
         highlightItems={[
           { label: "Fixed APY", value: utils.formatPercentDigit(apr) },
           {
@@ -180,6 +261,8 @@ export const FlexibleStakingCard = (props: Props) => {
                 key="unstake"
                 variant="outline"
                 className="bg-background-level1"
+                disabled={isUnstaking}
+                onClick={onUnstake}
               >
                 Unstake
               </Button>,
@@ -201,30 +284,26 @@ export const FlexibleStakingCard = (props: Props) => {
               <Image src="/ICY.png" alt="" width={20} height={20} />
               <Typography
                 level="h9"
-                color={earnedRewards ? "primary" : ""}
+                color={unclaimedRewards ? "primary" : ""}
                 className="pl-1 pr-0.5"
               >
-                {utils.formatDigit({ value: earnedRewards.toFixed(2) })}
+                {utils.formatTokenDigit(unclaimedRewards)}
               </Typography>
               <Typography level="h9" color="textDisabled">
-                ICY
+                {data.reward_token?.token_symbol}
               </Typography>
             </div>
           ),
           hidden,
         }}
         footerExtra={
-          stakedAmount && earnedRewards ? (
-            countDown ? (
-              <Badge
-                appearance="warning"
-                className="w-fit border border-warning-soft-active ml-auto"
-              >
-                {`${hours}h ${minutes}m ${seconds}s`}
-              </Badge>
-            ) : (
-              <Button variant="outline">Claim</Button>
-            )
+          stakedAmount && unclaimedRewards && finishTime ? (
+            <Countdown finishTime={finishTime}>
+              <Button variant="outline" disabled={isClaiming} onClick={onClaim}>
+                {isClaiming && <Spinner className="w-4 h-4" />}
+                {isClaiming ? "Claiming" : "Claim"}
+              </Button>
+            </Countdown>
           ) : null
         }
       />
