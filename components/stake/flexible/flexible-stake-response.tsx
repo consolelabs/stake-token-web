@@ -1,10 +1,14 @@
 import { Button, Switch, Tooltip, Typography } from "@mochi-ui/core";
-import { CheckCircleHalfColoredLine, CheckLine } from "@mochi-ui/icons";
+import {
+  ArrowTopRightLine,
+  CheckCircleHalfColoredLine,
+  CheckLine,
+} from "@mochi-ui/icons";
 import Image from "next/image";
-import { useEffect, useMemo } from "react";
 import { formatUnixTimestampToDateTime } from "@/utils/datetime";
-import { useFlexibleStaking } from "@/store/flexibleStaking";
-import { utils } from "@consolelabs/mochi-formatter";
+import { useFlexibleStaking } from "@/store/flexible-staking";
+import Link from "next/link";
+import { formatTokenAmount } from "@/utils/number";
 
 interface Props {
   onClose: () => void;
@@ -12,34 +16,11 @@ interface Props {
 
 export const FlexibleStakeResponse = (props: Props) => {
   const { onClose } = props;
-  const {
-    poolContract,
-    stakedAmount,
-    startTime,
-    finishTime,
-    autoStaking,
-    setValues,
-  } = useFlexibleStaking();
+  const { startTime, finishTime, autoStaking, latestStaking, setValues } =
+    useFlexibleStaking();
+  const { txHash, amount = 0 } = latestStaking || {};
 
-  const stakeDate = useMemo(
-    () => formatUnixTimestampToDateTime(Math.floor(Date.now() / 1000)),
-    []
-  );
-
-  useEffect(() => {
-    if (!poolContract) return;
-    const getPoolContract = async () => {
-      const stakeDates = await Promise.allSettled([
-        poolContract.getPeriodStartDate(),
-        poolContract.getPeriodFinishDate(),
-      ]);
-      const [startTime, finishTime] = stakeDates.map((r) =>
-        r.status === "fulfilled" ? r.value : ""
-      );
-      setValues({ stakeDate, startTime, finishTime });
-    };
-    getPoolContract();
-  }, [poolContract, setValues, stakeDate]);
+  const stakeDate = Math.floor(Date.now() / 1000);
 
   return (
     <>
@@ -57,7 +38,7 @@ export const FlexibleStakeResponse = (props: Props) => {
           <div className="flex items-center space-x-1">
             <Image src="/ICY.png" alt="icy" width={24} height={24} />
             <Typography level="h7" fontWeight="lg">
-              {utils.formatTokenDigit(stakedAmount)} ICY
+              {formatTokenAmount(amount).display} ICY
             </Typography>
           </div>
         </div>
@@ -69,7 +50,9 @@ export const FlexibleStakeResponse = (props: Props) => {
               </div>
               <Typography level="h9">Stake date</Typography>
             </div>
-            <Typography level="p5">{stakeDate}</Typography>
+            <Typography level="p5">
+              {formatUnixTimestampToDateTime(stakeDate)}
+            </Typography>
           </div>
           <div className="flex items-center justify-between relative">
             <div className="absolute -top-7 left-3 -translate-x-1/2 h-7 border-r border-neutral-soft-active" />
@@ -79,7 +62,9 @@ export const FlexibleStakeResponse = (props: Props) => {
               </div>
               <Typography level="h9">Value date</Typography>
             </div>
-            <Typography level="p5">{startTime}</Typography>
+            <Typography level="p5">
+              {formatUnixTimestampToDateTime(startTime)}
+            </Typography>
           </div>
           <div className="flex items-center justify-between relative">
             <div className="absolute -top-7 left-3 -translate-x-1/2 h-7 border-r border-neutral-soft-active" />
@@ -89,7 +74,9 @@ export const FlexibleStakeResponse = (props: Props) => {
               </div>
               <Typography level="h9">Interest distribution date</Typography>
             </div>
-            <Typography level="p5">{finishTime}</Typography>
+            <Typography level="p5">
+              {formatUnixTimestampToDateTime(finishTime)}
+            </Typography>
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -111,11 +98,17 @@ export const FlexibleStakeResponse = (props: Props) => {
       </div>
       <div className="mt-8 grid grid-cols-2 gap-3">
         <Button size="lg" variant="outline" color="neutral" onClick={onClose}>
-          Close
+          Back to Home
         </Button>
-        <Button size="lg" onClick={onClose}>
-          View My Earn
-        </Button>
+        <Link
+          target="_blank"
+          href={`https://base-sepolia.blockscout.com/tx/${txHash}`}
+        >
+          <Button size="lg" className="w-full">
+            View on explorer
+            <ArrowTopRightLine className="w-5 h-5" />
+          </Button>
+        </Link>
       </div>
     </>
   );

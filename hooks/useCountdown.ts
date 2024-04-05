@@ -8,7 +8,7 @@ const useCountdown = (seconds: number) => {
   }, [seconds]);
 
   useEffect(() => {
-    if (!countDown) return;
+    if (!countDown || countDown < 0) return;
 
     const interval = setInterval(() => {
       setCountDown(countDown - 1);
@@ -26,7 +26,7 @@ const getReturnValues = (countDown: number) => {
   const minutes = Math.floor((countDown % (60 * 60)) / 60);
   const seconds = Math.floor(countDown % 60);
 
-  return { countDown, hours, minutes, seconds };
+  return { countDown: Math.max(0, countDown), hours, minutes, seconds };
 };
 
 export { useCountdown };

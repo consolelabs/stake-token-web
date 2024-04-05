@@ -15,8 +15,8 @@ interface Props {
   tags: ReactNode;
   headerExtra: ReactNode;
   icon: ReactNode;
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   highlightItems: Item[];
   items: Item[];
   actions: ReactNode;
@@ -70,14 +70,18 @@ export const Card = (props: Props) => {
             {icon}
           </div>
           <div className="flex items-center space-x-1">
-            <Typography className="text-xl font-semibold">{title}</Typography>
-            <Tooltip
-              content={description}
-              className="max-w-xs"
-              arrow="top-center"
-            >
-              <InfoCircleOutlined className="w-4 h-4 text-text-icon-secondary" />
-            </Tooltip>
+            <Typography className="text-xl font-semibold">
+              {title || "-"}
+            </Typography>
+            {!!description && (
+              <Tooltip
+                content={description}
+                className="max-w-xs"
+                arrow="top-center"
+              >
+                <InfoCircleOutlined className="w-4 h-4 text-text-icon-secondary" />
+              </Tooltip>
+            )}
           </div>
         </div>
         <div className="rounded-lg bg-primary-soft px-4 py-2 grid grid-cols-2 gap-2">
@@ -119,7 +123,11 @@ export const Card = (props: Props) => {
               )}
               {!!item.convertedValue && (
                 <Typography level="p6" className="text-text-tertiary">
-                  {item.hidden ? "*****" : `≈ ${item.convertedValue}`}
+                  {item.hidden
+                    ? "*****"
+                    : item.convertedValue.startsWith("<")
+                    ? item.convertedValue
+                    : `≈ ${item.convertedValue}`}
                 </Typography>
               )}
             </div>
