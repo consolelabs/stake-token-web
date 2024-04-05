@@ -1,5 +1,5 @@
 import { TokenAmount, formatTokenAmount, getAmountWithDecimals } from "@/utils/number";
-import { ChainProvider } from "@mochi-web3/connect-wallet-widget";
+import { ChainProvider } from "@mochi-web3/login-widget";
 import { BigNumber, BigNumberish } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
 
