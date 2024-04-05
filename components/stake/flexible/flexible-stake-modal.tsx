@@ -9,14 +9,12 @@ import {
   toast,
 } from "@mochi-ui/core";
 import { CloseLgLine } from "@mochi-ui/icons";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { FlexibleStakeContent } from "./flexible-stake-content";
 import { FlexibleStakeResponse } from "./flexible-stake-response";
-import { useLoginWidget } from "@mochi-web3/login-widget";
-import { ERC20TokenInteraction } from "@/services/contracts/Token";
-import { PoolAddress, StakingPool } from "@/services/contracts/Pool";
-import { ChainProvider } from "@mochi-web3/connect-wallet-widget";
-import { useFlexibleStaking } from "@/store/flexibleStaking";
+import { ChainProvider, useLoginWidget } from "@mochi-web3/login-widget";
+import { PoolAddress } from "@/services/contracts/Pool";
+import { useFlexibleStaking } from "@/store/flexible-staking";
 import { retry } from "@/utils/retry";
 
 interface Props {
@@ -26,11 +24,18 @@ interface Props {
 
 export const FlexibleStakeModal = (props: Props) => {
   const { open, onOpenChange } = props;
-  const { wallets, getProviderByAddress, isLoggingIn, isLoggedIn } =
-    useLoginWidget();
-  const { poolContract, icyContract, allowance, stakedAmount, setValues } =
-    useFlexibleStaking();
-  const ref = useRef<HTMLDivElement>(null);
+  const { wallets, getProviderByAddress } = useLoginWidget();
+  const {
+    poolContract,
+    icyContract,
+    allowance,
+    stakedAmount,
+    initializeValues,
+    initializeContract,
+    updateValues,
+    setValues,
+  } = useFlexibleStaking();
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [state, setState] = useState<"init" | "approved" | "success">("init");
   const [loading, setLoading] = useState<
     "Initializing" | "Approving" | "Staking" | null
@@ -39,93 +44,47 @@ export const FlexibleStakeModal = (props: Props) => {
   const connected = wallets.find((w) => w.connectionStatus === "connected");
   const address = connected?.address || "";
 
-  const updateValues = useCallback(async () => {
-    if (!poolContract || !icyContract) return;
-    const [
-      getBalance,
-      getAllowance,
-      getApr,
-      getStakedAmount,
-      getPoolStakedAmount,
-      getEarnedRewards,
-    ] = await Promise.allSettled([
-      icyContract.getTokenBalance(),
-      icyContract.getAllowance(PoolAddress.POOL_ICY_ICY),
-      poolContract.calculateRealtimeAPR(),
-      poolContract.getSenderStakedAmount(),
-      poolContract.getPoolTotalStakedAmount(),
-      poolContract.getTotalRewardEarnedForAddress(),
-    ]);
-    const apr = getApr.status === "fulfilled" ? getApr.value || 0 : 0;
-    const balance =
-      getBalance.status === "fulfilled" ? getBalance.value?.value || 0 : 0;
-    const allowance =
-      getAllowance.status === "fulfilled" ? getAllowance.value?.value || 0 : 0;
-    const stakedAmount =
-      getStakedAmount.status === "fulfilled"
-        ? getStakedAmount.value?.value || 0
-        : 0;
-    const poolStakedAmount =
-      getPoolStakedAmount.status === "fulfilled"
-        ? getPoolStakedAmount.value?.value || 0
-        : 0;
-    const earnedRewards =
-      getEarnedRewards.status === "fulfilled"
-        ? getEarnedRewards.value?.value || 0
-        : 0;
-    setValues({
-      apr,
-      balance,
-      allowance,
-      stakedAmount,
-      poolStakedAmount,
-      earnedRewards,
-    });
-  }, [icyContract, poolContract, setValues]);
+  useEffect(() => {
+    if (!!address) return;
+    initializeValues();
+  }, [address, initializeValues]);
 
   useEffect(() => {
     if (!address) return;
-    const provider = getProviderByAddress(address) as ChainProvider | null;
-    if (!provider) {
-      toast({
-        scheme: "danger",
-        title: "Error",
-        description: "No provider connected.",
-      });
-      return;
-    }
-
-    const initializeContractInteraction = async () => {
+    const init = async () => {
       try {
+        const provider = getProviderByAddress(address) as ChainProvider | null;
+        if (!provider) {
+          throw new Error("No provider connected.");
+        }
         setLoading("Initializing");
-        const poolContract = StakingPool.getInstance("ICY_ICY", provider);
-        const icyContract = ERC20TokenInteraction.getInstance("ICY", provider);
-        poolContract.setSenderAddress(address);
-        icyContract.setSenderAddress(address);
-        setValues({ poolContract, icyContract });
-
+        initializeContract(address, provider);
         await updateValues();
-      } catch (err) {
+      } catch (err: any) {
         toast({
           scheme: "danger",
           title: "Error",
-          description: "Failed to initialize contract interaction",
+          description:
+            typeof err.message === "string"
+              ? err.message
+              : "Failed to initialize contract interaction",
         });
       } finally {
         setLoading(null);
       }
     };
-    initializeContractInteraction();
-  }, [address, getProviderByAddress, setValues, updateValues]);
+    init();
+  }, [address, getProviderByAddress, initializeContract, updateValues]);
 
   const onStake = async (amount: number) => {
     if (!poolContract) return;
     try {
       setLoading("Staking");
-      const tx = await poolContract.stake(amount);
-      if (!tx) {
+      const txHash = await poolContract.stake(amount);
+      if (!txHash) {
         throw new Error("Failed to stake");
       }
+      setValues({ latestStaking: { txHash, amount } });
       // FIXME: retry to get updated values
       const newStakedAmount = await retry(
         async () => {
@@ -144,11 +103,12 @@ export const FlexibleStakeModal = (props: Props) => {
       }
       await updateValues();
       setState("success");
-    } catch (err) {
+    } catch (err: any) {
       toast({
         scheme: "danger",
         title: "Error",
-        description: "Failed to stake",
+        description:
+          typeof err.message === "string" ? err.message : "Failed to stake",
       });
     } finally {
       setLoading(null);
@@ -159,11 +119,11 @@ export const FlexibleStakeModal = (props: Props) => {
     if (!icyContract) return;
     try {
       setLoading("Approving");
-      const tx = await icyContract.approveTokenAmount(
+      const txHash = await icyContract.approveTokenAmount(
         PoolAddress.POOL_ICY_ICY,
         amount
       );
-      if (!tx) {
+      if (!txHash) {
         throw new Error("Failed to approve allowance");
       }
       // FIXME: retry to get updated values
@@ -186,20 +146,19 @@ export const FlexibleStakeModal = (props: Props) => {
       }
       await updateValues();
       setState("approved");
-    } catch (err) {
+    } catch (err: any) {
       toast({
         scheme: "danger",
         title: "Error",
-        description: "Failed to approve allowance",
+        description:
+          typeof err.message === "string"
+            ? err.message
+            : "Failed to approve allowance",
       });
     } finally {
       setLoading(null);
     }
   };
-
-  if (isLoggingIn) {
-    return null;
-  }
 
   return (
     <Modal
@@ -214,8 +173,12 @@ export const FlexibleStakeModal = (props: Props) => {
       <ModalPortal>
         <ModalOverlay />
         <ModalContent
-          className="w-full max-w-[530px] overflow-hidden"
-          ref={ref}
+          className="w-full max-w-[530px] overflow-clip"
+          ref={(ref) => {
+            if (ref && !container) {
+              setContainer(ref);
+            }
+          }}
         >
           {(state === "init" || state === "approved") && (
             <ModalTitle className="relative pb-3">
@@ -229,9 +192,7 @@ export const FlexibleStakeModal = (props: Props) => {
           )}
           {(state === "init" || state === "approved") && (
             <FlexibleStakeContent
-              {...{ onApprove, onStake, loading }}
-              connected={isLoggedIn && !!connected}
-              container={ref.current}
+              {...{ onApprove, onStake, loading, container }}
             />
           )}
           {state === "success" && (

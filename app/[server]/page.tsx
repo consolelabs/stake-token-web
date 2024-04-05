@@ -8,17 +8,24 @@ import { Button, IconButton, TopBar, Typography } from "@mochi-ui/core";
 import { EyeHiddenSolid, EyeShowSolid } from "@mochi-ui/icons";
 import { useLoginWidget } from "@mochi-web3/login-widget";
 import Image from "next/image";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { FlexibleStakingCard } from "@/components/overview/FlexibleStakingCard";
 import { FixedStakingCard } from "@/components/overview/FixedStakingCard";
 import { NFTCard } from "@/components/overview/NFTCard";
-import { useFlexibleStaking } from "@/store/flexibleStaking";
+import { useFlexibleStaking } from "@/store/flexible-staking";
 import { utils } from "@consolelabs/mochi-formatter";
+import { useTokenStaking } from "@/store/token-staking";
 
 const Overview = () => {
   const { isLoggedIn } = useLoginWidget();
   const [showInfo, setShowInfo] = useState(true);
-  const { balance } = useFlexibleStaking();
+  const { balance, stakedAmount, totalEarnedRewards, tokenPrice } =
+    useFlexibleStaking();
+  const { fetchStakingTokens } = useTokenStaking();
+
+  useEffect(() => {
+    fetchStakingTokens();
+  }, [fetchStakingTokens]);
 
   return (
     <div className="overflow-y-auto h-[calc(100vh-56px)]">
@@ -32,11 +39,14 @@ const Overview = () => {
               </span>{" "}
               ICY and{" "}
               <span className="text-danger-solid">
-                {showInfo ? 1478.31 : "*****"}
+                {showInfo ? utils.formatTokenDigit(0) : "*****"}
               </span>{" "}
-              DFG and <span className="text-success-solid">2</span> assets
-              across <span className="text-secondary-solid">1</span> networks
-              available to stake.
+              DFG and{" "}
+              <span className="text-success-solid">
+                {utils.formatTokenDigit(0)}
+              </span>{" "}
+              assets across <span className="text-secondary-solid">1</span>{" "}
+              networks available to stake.
             </Typography>
           ) : (
             <Typography level="h3" fontWeight="lg" className="flex-1 pb-3">
@@ -77,7 +87,9 @@ const Overview = () => {
                     Total amount staked
                   </Typography>
                   <Typography level="h6" fontWeight="lg">
-                    {showInfo ? "$1,264.32" : "*********"}
+                    {showInfo
+                      ? utils.formatUsdDigit(stakedAmount * tokenPrice)
+                      : "*********"}
                   </Typography>
                 </div>
                 <div className="flex items-center space-x-1 ml-2">
@@ -91,7 +103,9 @@ const Overview = () => {
                     Rewards earned
                   </Typography>
                   <Typography level="h6" fontWeight="lg" color="success">
-                    {showInfo ? "0" : "********"}
+                    {showInfo
+                      ? utils.formatUsdDigit(totalEarnedRewards * tokenPrice)
+                      : "********"}
                   </Typography>
                 </div>
                 <div className="space-y-0.5">

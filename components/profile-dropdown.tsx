@@ -15,6 +15,7 @@ import { version as appVersion } from "../package.json";
 import { utils } from "@consolelabs/mochi-formatter";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
+import { useFlexibleStaking } from "@/store/flexible-staking";
 
 export default function ProfileDropdown({
   children,
@@ -25,6 +26,7 @@ export default function ProfileDropdown({
 }) {
   const { isLoggedIn, profile, logout } = useLoginWidget();
   const { push } = useRouter();
+  const { reset: resetFlexibleStaking } = useFlexibleStaking();
 
   let triggerRender = null;
   if (children) {
@@ -61,6 +63,7 @@ export default function ProfileDropdown({
           <DropdownMenuItem
             hasPaddingLeft
             onClick={() => {
+              resetFlexibleStaking();
               logout();
               push(ROUTES.HOME);
             }}
