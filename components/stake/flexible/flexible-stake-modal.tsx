@@ -13,7 +13,6 @@ import { useEffect, useState } from "react";
 import { FlexibleStakeContent } from "./flexible-stake-content";
 import { FlexibleStakeResponse } from "./flexible-stake-response";
 import { ChainProvider, useLoginWidget } from "@mochi-web3/login-widget";
-import { PoolAddress } from "@/services/contracts/Pool";
 import { useFlexibleStaking } from "@/store/flexible-staking";
 import { retry } from "@/utils/retry";
 
@@ -27,7 +26,7 @@ export const FlexibleStakeModal = (props: Props) => {
   const { wallets, getProviderByAddress } = useLoginWidget();
   const {
     poolContract,
-    icyContract,
+    stakingTokenContract,
     allowance,
     stakedAmount,
     initializeValues,
@@ -86,21 +85,17 @@ export const FlexibleStakeModal = (props: Props) => {
       }
       setValues({ latestStaking: { txHash, amount } });
       // FIXME: retry to get updated values
-      const newStakedAmount = await retry(
+      await retry(
         async () => {
           const newStakedAmount = await poolContract.getSenderStakedAmount();
-          if (newStakedAmount?.value !== stakedAmount) {
-            return newStakedAmount?.value;
-          } else {
-            throw new Error("Staked amount not updated");
+          if (!newStakedAmount || newStakedAmount.eq(stakedAmount)) {
+            throw new Error("Failed to stake");
           }
+          return newStakedAmount;
         },
         3000,
         100
       );
-      if (!newStakedAmount) {
-        throw new Error("Failed to get updated values");
-      }
       await updateValues();
       setState("success");
     } catch (err: any) {
@@ -116,34 +111,30 @@ export const FlexibleStakeModal = (props: Props) => {
   };
 
   const onApprove = async (amount: number) => {
-    if (!icyContract) return;
+    if (!stakingTokenContract || !poolContract) return;
     try {
       setLoading("Approving");
-      const txHash = await icyContract.approveTokenAmount(
-        PoolAddress.POOL_ICY_ICY,
+      const txHash = await stakingTokenContract.approveTokenAmount(
+        poolContract.getAddress(),
         amount
       );
       if (!txHash) {
         throw new Error("Failed to approve allowance");
       }
       // FIXME: retry to get updated values
-      const newAllowance = await retry(
+      await retry(
         async () => {
-          const newAllowance = await icyContract.getAllowance(
-            PoolAddress.POOL_ICY_ICY
+          const newAllowance = await stakingTokenContract.getAllowance(
+            poolContract.getAddress()
           );
-          if (newAllowance?.value !== allowance) {
-            return newAllowance?.value;
-          } else {
-            throw new Error("Allowance not updated");
+          if (!newAllowance || newAllowance.eq(allowance)) {
+            throw new Error("Failed to approve allowance");
           }
+          return newAllowance;
         },
         3000,
         100
       );
-      if (!newAllowance) {
-        throw new Error("Failed to get updated values");
-      }
       await updateValues();
       setState("approved");
     } catch (err: any) {

@@ -68,7 +68,7 @@ export const FixedStakeContent = (props: Props) => {
             </ToggleButton>
           ))}
         </ToggleButtonGroup>
-        <StakeInput {...{ amount, setAmount }} />
+        <StakeInput {...{ amount, setAmount }} balance={0} convertedValue={0} />
       </div>
       <div className="px-6 py-2 flex items-center justify-between space-x-6">
         <Typography level="h8" color="textSecondary">

@@ -8,11 +8,12 @@ import { TokenAmount, formatTokenAmount } from "@/utils/number";
 interface Props {
   balance?: number;
   amount: TokenAmount;
+  convertedValue: number;
   setAmount: Dispatch<SetStateAction<TokenAmount>>;
 }
 
 export const StakeInput = (props: Props) => {
-  const { balance = 0, amount, setAmount } = props;
+  const { balance = 0, amount, convertedValue, setAmount } = props;
   const [percent, setPercent] = useState(0);
 
   const onMaxAmount = () => {
@@ -166,17 +167,12 @@ export const StakeInput = (props: Props) => {
         </div>
         <div className="flex items-center justify-between">
           <Typography className="!text-[13px] text-text-tertiary">
-            ≈ $0.00 USD
+            ≈ ${utils.formatDigit({ value: convertedValue })} USD
           </Typography>
           <Typography className="!text-[13px] text-text-tertiary">
             Balance:{" "}
             <button onClick={onMaxAmount}>
-              {utils.formatTokenDigit({
-                value: balance,
-                shorten: false,
-                fractionDigits: 2,
-              })}{" "}
-              ICY
+              {utils.formatDigit({ value: balance })} ICY
             </button>
           </Typography>
         </div>

@@ -3,23 +3,23 @@ import { ChainProvider } from "@mochi-web3/login-widget";
 import { create } from "zustand";
 import { useTokenStaking } from "./token-staking";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { BigNumber, Contract } from "ethers";
-import { formatUnits } from "ethers/lib/utils";
+import { BigNumber, Contract, constants } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 
 interface State {
   address: string;
   provider: ChainProvider | null;
   poolContract: StakingPool | null;
-  icyContract: ERC20TokenInteraction | null;
-  apr: number;
-  balance: number;
-  allowance: number;
-  stakedAmount: number;
-  poolStakedAmount: number;
-  unclaimedRewards: number;
-  totalEarnedRewards: number;
-  nftBoost: number;
-  tokenPrice: number;
+  stakingTokenContract: ERC20TokenInteraction | null;
+  apr: BigNumber;
+  balance: BigNumber;
+  allowance: BigNumber;
+  stakedAmount: BigNumber;
+  poolStakedAmount: BigNumber;
+  unclaimedRewards: BigNumber;
+  totalEarnedRewards: BigNumber;
+  nftBoost: BigNumber;
+  tokenPrice: BigNumber;
   startTime: number; // in seconds
   finishTime: number; // in seconds
   autoStaking: boolean;
@@ -41,21 +41,26 @@ const initialState: State = {
   address: "",
   provider: null,
   poolContract: null,
-  icyContract: null,
-  apr: 0,
-  balance: 0,
-  allowance: 0,
-  stakedAmount: 0,
-  poolStakedAmount: 0,
-  unclaimedRewards: 0,
-  totalEarnedRewards: 0,
-  nftBoost: 0,
-  tokenPrice: 0,
+  stakingTokenContract: null,
+  apr: constants.Zero,
+  balance: constants.Zero,
+  allowance: constants.Zero,
+  stakedAmount: constants.Zero,
+  poolStakedAmount: constants.Zero,
+  unclaimedRewards: constants.Zero,
+  totalEarnedRewards: constants.Zero,
+  nftBoost: constants.Zero,
+  tokenPrice: constants.Zero,
   startTime: 0,
   finishTime: 0,
   autoStaking: true,
   latestStaking: null,
 };
+
+const getStakingPool = () =>
+  useTokenStaking
+    .getState()
+    .stakingPools.find((each) => each.type === "flexible");
 
 export const useFlexibleStaking = create<State & Action>((set, get) => ({
   ...initialState,
@@ -67,7 +72,7 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
   initializeValues: async () => {
     const stakingToken = useTokenStaking
       .getState()
-      .stakingTokens.find((each) => each.type === "flexible");
+      .stakingPools.find((each) => each.type === "flexible");
     if (!stakingToken) return;
 
     try {
@@ -90,49 +95,46 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
       // get apr
       const daysInYear = 365;
       const rewardRate = BigNumber.isBigNumber(rewardRateRes)
-        ? Number(
-            formatUnits(
-              rewardRateRes.toBigInt(),
-              stakingToken.staking_token?.token_decimal
-            )
-          )
-        : 0;
+        ? rewardRateRes
+        : constants.Zero;
       const rewardDuration = BigNumber.isBigNumber(rewardDurationRes)
-        ? rewardDurationRes.toNumber()
-        : 0;
-      const apr =
-        rewardRate && rewardDuration
-          ? Math.trunc(rewardRate * rewardDuration * daysInYear * 100)
-          : 0;
+        ? rewardDurationRes
+        : constants.Zero;
+      const apr = rewardRate.mul(rewardDuration).mul(daysInYear * 100);
 
       //get pool staked amount
       const poolStakedAmount = BigNumber.isBigNumber(totalSupplyRes)
-        ? Number(
-            formatUnits(
-              totalSupplyRes.toBigInt(),
-              stakingToken.staking_token?.token_decimal
-            )
-          )
-        : 0;
+        ? totalSupplyRes
+        : constants.Zero;
 
       get().setValues({
         apr,
         poolStakedAmount,
-        tokenPrice: stakingToken.staking_token?.token_price || 0,
+        tokenPrice: stakingToken.staking_token?.token_price
+          ? parseUnits(stakingToken.staking_token.token_price.toString())
+          : constants.Zero,
       });
     } catch (err: any) {}
   },
   initializeContract: (address, provider) => {
-    const poolContract = StakingPool.getInstance("ICY_ICY", provider);
-    const icyContract = ERC20TokenInteraction.getInstance("ICY", provider);
+    const pool = getStakingPool();
+    if (!pool || !pool?.contract || !pool?.staking_token) {
+      return;
+    }
+    const poolContract = StakingPool.getInstance(pool, provider);
+    const stakingTokenContract = ERC20TokenInteraction.getInstance(
+      pool?.staking_token,
+      provider
+    );
+    if (!poolContract || !stakingTokenContract) return;
     poolContract.setSenderAddress(address);
-    icyContract.setSenderAddress(address);
-    get().setValues({ address, provider, poolContract, icyContract });
+    stakingTokenContract.setSenderAddress(address);
+    get().setValues({ address, provider, poolContract, stakingTokenContract });
   },
   updateValues: async () => {
-    const stakingToken = useTokenStaking.getState().stakingTokens[0];
-    const { icyContract, poolContract } = get();
-    if (!icyContract || !poolContract || !stakingToken) return;
+    const stakingToken = useTokenStaking.getState().stakingPools[0];
+    const { stakingTokenContract, poolContract } = get();
+    if (!stakingTokenContract || !poolContract || !stakingToken) return;
 
     const [
       getBalance,
@@ -145,8 +147,10 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
       getStartDate,
       getFinishDate,
     ] = await Promise.allSettled([
-      icyContract.getTokenBalance(),
-      icyContract.getAllowance(stakingToken.contract?.contract_address || ""),
+      stakingTokenContract.getTokenBalance(),
+      stakingTokenContract.getAllowance(
+        stakingToken.contract?.contract_address || ""
+      ),
       poolContract.calculateRealtimeAPR(),
       poolContract.getSenderStakedAmount(),
       poolContract.getPoolTotalStakedAmount(),
@@ -155,33 +159,39 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
       poolContract.getPeriodStartDate(),
       poolContract.getPeriodFinishDate(),
     ]);
-    const apr = getApr.status === "fulfilled" ? getApr.value || 0 : 0;
+    const apr =
+      getApr.status === "fulfilled"
+        ? getApr.value || constants.Zero
+        : constants.Zero;
     const balance =
-      getBalance.status === "fulfilled" ? getBalance.value?.value || 0 : 0;
+      getBalance.status === "fulfilled"
+        ? getBalance.value || constants.Zero
+        : constants.Zero;
     const allowance =
-      getAllowance.status === "fulfilled" ? getAllowance.value?.value || 0 : 0;
+      getAllowance.status === "fulfilled"
+        ? getAllowance.value || constants.Zero
+        : constants.Zero;
     const stakedAmount =
       getStakedAmount.status === "fulfilled"
-        ? getStakedAmount.value?.value || 0
-        : 0;
+        ? getStakedAmount.value || constants.Zero
+        : constants.Zero;
     const poolStakedAmount =
       getPoolStakedAmount.status === "fulfilled"
-        ? getPoolStakedAmount.value?.value || 0
-        : 0;
+        ? getPoolStakedAmount.value || constants.Zero
+        : constants.Zero;
     const unclaimedRewards =
       getUnclaimedRewards.status === "fulfilled"
-        ? getUnclaimedRewards.value?.value || 0
-        : 0;
+        ? getUnclaimedRewards.value || constants.Zero
+        : constants.Zero;
     const totalEarnedRewards =
       getTotalEarnedRewards.status === "fulfilled"
-        ? getTotalEarnedRewards.value?.value || 0
-        : 0;
+        ? getTotalEarnedRewards.value || constants.Zero
+        : constants.Zero;
     const startTime =
       getStartDate.status === "fulfilled" ? getStartDate.value : 0;
     const finishTime =
       getFinishDate.status === "fulfilled" ? getFinishDate.value : 0;
-    set((state) => ({
-      ...state,
+    get().setValues({
       apr,
       balance,
       allowance,
@@ -191,6 +201,6 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
       totalEarnedRewards,
       startTime,
       finishTime,
-    }));
+    });
   },
 }));

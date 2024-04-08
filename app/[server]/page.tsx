@@ -15,17 +15,18 @@ import { NFTCard } from "@/components/overview/NFTCard";
 import { useFlexibleStaking } from "@/store/flexible-staking";
 import { utils } from "@consolelabs/mochi-formatter";
 import { useTokenStaking } from "@/store/token-staking";
+import { formatUnits, parseUnits } from "ethers/lib/utils";
 
 const Overview = () => {
   const { isLoggedIn } = useLoginWidget();
   const [showInfo, setShowInfo] = useState(true);
   const { balance, stakedAmount, totalEarnedRewards, tokenPrice } =
     useFlexibleStaking();
-  const { fetchStakingTokens } = useTokenStaking();
+  const { fetchStakingPools } = useTokenStaking();
 
   useEffect(() => {
-    fetchStakingTokens();
-  }, [fetchStakingTokens]);
+    fetchStakingPools();
+  }, [fetchStakingPools]);
 
   return (
     <div className="overflow-y-auto h-[calc(100vh-56px)]">
@@ -35,7 +36,9 @@ const Overview = () => {
             <Typography level="h3" fontWeight="lg" className="flex-1">
               You have{" "}
               <span className="text-primary-solid">
-                {showInfo ? utils.formatTokenDigit(balance) : "*****"}
+                {showInfo
+                  ? utils.formatTokenDigit(formatUnits(balance))
+                  : "*****"}
               </span>{" "}
               ICY and{" "}
               <span className="text-danger-solid">
@@ -88,7 +91,11 @@ const Overview = () => {
                   </Typography>
                   <Typography level="h6" fontWeight="lg">
                     {showInfo
-                      ? utils.formatUsdDigit(stakedAmount * tokenPrice)
+                      ? utils.formatUsdDigit(
+                          formatUnits(
+                            stakedAmount.mul(tokenPrice).div(parseUnits("1"))
+                          )
+                        )
                       : "*********"}
                   </Typography>
                 </div>
@@ -104,7 +111,13 @@ const Overview = () => {
                   </Typography>
                   <Typography level="h6" fontWeight="lg" color="success">
                     {showInfo
-                      ? utils.formatUsdDigit(totalEarnedRewards * tokenPrice)
+                      ? utils.formatUsdDigit(
+                          formatUnits(
+                            totalEarnedRewards
+                              .mul(tokenPrice)
+                              .div(parseUnits("1"))
+                          )
+                        )
                       : "********"}
                   </Typography>
                 </div>
