@@ -4,11 +4,11 @@ import {
   CheckCircleHalfColoredLine,
   CheckLine,
 } from "@mochi-ui/icons";
-import Image from "next/image";
 import { formatUnixTimestampToDateTime } from "@/utils/datetime";
 import { useFlexibleStaking } from "@/store/flexible-staking";
 import Link from "next/link";
 import { formatTokenAmount } from "@/utils/number";
+import { TokenImage } from "@/components/token-image";
 
 interface Props {
   onClose: () => void;
@@ -16,8 +16,14 @@ interface Props {
 
 export const FlexibleStakeResponse = (props: Props) => {
   const { onClose } = props;
-  const { startTime, finishTime, autoStaking, latestStaking, setValues } =
-    useFlexibleStaking();
+  const {
+    startTime,
+    finishTime,
+    autoStaking,
+    latestStaking,
+    stakingToken,
+    setValues,
+  } = useFlexibleStaking();
   const { txHash, amount = 0 } = latestStaking || {};
 
   const stakeDate = Math.floor(Date.now() / 1000);
@@ -36,9 +42,9 @@ export const FlexibleStakeResponse = (props: Props) => {
             You’re staking
           </Typography>
           <div className="flex items-center space-x-1">
-            <Image src="/ICY.png" alt="icy" width={24} height={24} />
+            <TokenImage symbol={stakingToken?.token_symbol} size={24} />
             <Typography level="h7" fontWeight="lg">
-              {formatTokenAmount(amount).display} ICY
+              {formatTokenAmount(amount).display} {stakingToken?.token_symbol}
             </Typography>
           </div>
         </div>
