@@ -1,13 +1,9 @@
 "use client";
 
-import { LoginPopover } from "@/components/login-popover";
-import { Logo } from "@/components/logo";
-import ProfileDropdown from "@/components/profile-dropdown";
-import { TopBar, Typography } from "@mochi-ui/core";
-import { useLoginWidget } from "@mochi-web3/login-widget";
 import { CheckCircleHalfColoredLine } from "@mochi-ui/icons";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { Header } from "@/components/header/header";
 
 const Auth = () => {
   const searchParams = useSearchParams();
@@ -29,14 +25,9 @@ const Auth = () => {
 };
 
 export default function Page() {
-  const { isLoggedIn } = useLoginWidget();
-
   return (
     <main>
-      <TopBar
-        leftSlot={<Logo />}
-        rightSlot={!isLoggedIn ? <LoginPopover /> : <ProfileDropdown />}
-      />
+      <Header />
       <Suspense>
         <Auth />
       </Suspense>
