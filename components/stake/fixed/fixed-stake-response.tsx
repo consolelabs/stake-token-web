@@ -1,10 +1,4 @@
-import {
-  Button,
-  ModalClose,
-  Switch,
-  Tooltip,
-  Typography,
-} from "@mochi-ui/core";
+import { Button, Switch, Tooltip, Typography } from "@mochi-ui/core";
 import { CheckCircleHalfColoredLine, CheckLine } from "@mochi-ui/icons";
 import Image from "next/image";
 

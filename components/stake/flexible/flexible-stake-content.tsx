@@ -15,7 +15,7 @@ import { useFlexibleStaking } from "@/store/flexible-staking";
 import { Spinner } from "@mochi-ui/icons";
 import { LoginWidget, useLoginWidget } from "@mochi-web3/login-widget";
 import { utils } from "@consolelabs/mochi-formatter";
-import { useTokenStaking } from "@/store/token-staking";
+import { formatUnits, parseUnits } from "ethers/lib/utils";
 
 interface Props {
   onStake: (amount: number) => Promise<void>;
@@ -27,14 +27,9 @@ interface Props {
 export const FlexibleStakeContent = (props: Props) => {
   const { onStake, onApprove, loading, container } = props;
   const { isLoggedIn } = useLoginWidget();
-  const { balance, allowance, apr, provider } = useFlexibleStaking();
-  const { stakingTokens } = useTokenStaking();
-  const chain = useMemo(
-    () =>
-      stakingTokens.find((each) => each.type === "flexible")?.staking_token
-        ?.token_chain_id,
-    [stakingTokens]
-  );
+  const { balance, allowance, apr, stakingToken, provider } =
+    useFlexibleStaking();
+  const chain = useMemo(() => stakingToken?.token_chain_id, [stakingToken]);
   const [amount, setAmount] = useState<TokenAmount>({
     value: 0,
     display: "",
@@ -43,6 +38,12 @@ export const FlexibleStakeContent = (props: Props) => {
     provider?.chainId === `0x${chain?.id?.toString(16)}`
   );
 
+  const convertedBalance = Number(
+    formatUnits(balance, stakingToken?.token_decimal)
+  );
+  const convertedAllowance = Number(
+    formatUnits(allowance, stakingToken?.token_decimal)
+  );
   const isConnected = isLoggedIn && !!provider;
   const changeNetwork = async () => {
     try {
@@ -106,7 +107,9 @@ export const FlexibleStakeContent = (props: Props) => {
         <div className="rounded-lg bg-primary-soft px-6 py-3 space-y-0.5">
           <div className="flex items-center justify-center text-center space-x-1">
             <Typography level="h6" fontWeight="xl" color="success">
-              {utils.formatPercentDigit(apr)}
+              {utils.formatPercentDigit(
+                formatUnits(apr, stakingToken?.token_decimal)
+              )}
             </Typography>
             <Typography level="h6" color="primary">
               Fixed APY
@@ -116,24 +119,31 @@ export const FlexibleStakeContent = (props: Props) => {
             Withdraw anytime at market prices
           </Typography>
         </div>
-        <StakeInput {...{ amount, setAmount, balance }} />
+        <StakeInput
+          {...{ amount, setAmount }}
+          balance={convertedBalance}
+          convertedValue={amount.value * (stakingToken?.token_price || 1)}
+          token={stakingToken}
+        />
       </div>
       {isConnected && isBaseChain ? (
         <Button
           size="lg"
-          disabled={amount.value <= 0 || amount.value > balance || !!loading}
+          disabled={
+            amount.value <= 0 || amount.value > convertedBalance || !!loading
+          }
           className="mt-3"
           onClick={
-            allowance >= amount.value
+            convertedAllowance >= amount.value
               ? () => onStake(amount.value)
               : () => onApprove(amount.value)
           }
         >
           {!!loading && <Spinner className="w-4 h-4" />}
           {loading ||
-            (amount.value > balance
+            (amount.value > convertedBalance
               ? "Insufficient balance"
-              : allowance >= amount.value
+              : convertedAllowance >= amount.value
               ? "Stake"
               : "Approve Spending Cap")}
         </Button>

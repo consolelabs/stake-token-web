@@ -1,13 +1,9 @@
 "use client";
 
 import { Footer } from "@/components/footer";
-import { LoginPopover } from "@/components/login-popover";
-import { Logo } from "@/components/logo";
-import ProfileDropdown from "@/components/profile-dropdown";
-import { Button, IconButton, TopBar, Typography } from "@mochi-ui/core";
+import { Button, IconButton, Typography } from "@mochi-ui/core";
 import { EyeHiddenSolid, EyeShowSolid } from "@mochi-ui/icons";
 import { useLoginWidget } from "@mochi-web3/login-widget";
-import Image from "next/image";
 import { Suspense, useEffect, useState } from "react";
 import { FlexibleStakingCard } from "@/components/overview/FlexibleStakingCard";
 import { FixedStakingCard } from "@/components/overview/FixedStakingCard";
@@ -15,42 +11,58 @@ import { NFTCard } from "@/components/overview/NFTCard";
 import { useFlexibleStaking } from "@/store/flexible-staking";
 import { utils } from "@consolelabs/mochi-formatter";
 import { useTokenStaking } from "@/store/token-staking";
+import { formatUnits, parseUnits } from "ethers/lib/utils";
+import clsx from "clsx";
+import { TokenImage } from "@/components/token-image";
+import { Header } from "@/components/header/header";
 
 const Overview = () => {
   const { isLoggedIn } = useLoginWidget();
-  const [showInfo, setShowInfo] = useState(true);
-  const { balance, stakedAmount, totalEarnedRewards, tokenPrice } =
-    useFlexibleStaking();
-  const { fetchStakingTokens } = useTokenStaking();
+  const { stakingPools, fetchStakingPools } = useTokenStaking();
+  const {
+    balance,
+    stakedAmount,
+    totalEarnedRewards,
+    stakingToken,
+    rewardToken,
+  } = useFlexibleStaking();
+  const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
-    fetchStakingTokens();
-  }, [fetchStakingTokens]);
+    fetchStakingPools();
+  }, [fetchStakingPools]);
+
+  useEffect(() => {
+    if (!!balance && !showInfo) {
+      setShowInfo(true);
+    }
+  }, [balance, showInfo]);
 
   return (
     <div className="overflow-y-auto h-[calc(100vh-56px)]">
       <div className="max-w-6xl pt-12 pb-16 px-4 mx-auto space-y-14">
         <div className="flex gap-8 flex-col lg:flex-row items-center lg:items-start">
-          {isLoggedIn ? (
+          {!isLoggedIn ? (
+            <Typography level="h3" fontWeight="lg" className="flex-1 pb-3">
+              Log in to see your available assets to stake
+            </Typography>
+          ) : balance.isZero() ? (
+            <Typography level="h3" fontWeight="lg" className="flex-1 pb-3">
+              You don&apos;t have available assets to stake in your wallet.
+            </Typography>
+          ) : (
             <Typography level="h3" fontWeight="lg" className="flex-1">
               You have{" "}
               <span className="text-primary-solid">
-                {showInfo ? utils.formatTokenDigit(balance) : "*****"}
+                {showInfo
+                  ? utils.formatTokenDigit(
+                      formatUnits(balance, stakingToken?.token_decimal)
+                    )
+                  : "*****"}
               </span>{" "}
-              ICY and{" "}
-              <span className="text-danger-solid">
-                {showInfo ? utils.formatTokenDigit(0) : "*****"}
-              </span>{" "}
-              DFG and{" "}
-              <span className="text-success-solid">
-                {utils.formatTokenDigit(0)}
-              </span>{" "}
-              assets across <span className="text-secondary-solid">1</span>{" "}
-              networks available to stake.
-            </Typography>
-          ) : (
-            <Typography level="h3" fontWeight="lg" className="flex-1 pb-3">
-              Log in to see your available assets to stake
+              {stakingToken?.token_symbol} across{" "}
+              <span className="text-secondary-solid">1</span> networks available
+              to stake.
             </Typography>
           )}
           {isLoggedIn && (
@@ -88,13 +100,28 @@ const Overview = () => {
                   </Typography>
                   <Typography level="h6" fontWeight="lg">
                     {showInfo
-                      ? utils.formatUsdDigit(stakedAmount * tokenPrice)
+                      ? utils.formatUsdDigit(
+                          formatUnits(
+                            stakedAmount
+                              .mul(
+                                parseUnits(
+                                  String(stakingToken?.token_price || 1)
+                                )
+                              )
+                              .div(parseUnits("1")),
+                            stakingToken?.token_decimal
+                          )
+                        )
                       : "*********"}
                   </Typography>
                 </div>
                 <div className="flex items-center space-x-1 ml-2">
-                  <Image src="/ICY.png" alt="icy" width={20} height={20} />
-                  <Image src="/DFG.png" alt="dfg" width={20} height={20} />
+                  {stakingPools.map((each) => (
+                    <TokenImage
+                      key={each.guild_id}
+                      symbol={each.staking_token.token_symbol}
+                    />
+                  ))}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-6 items-center py-3">
@@ -104,7 +131,18 @@ const Overview = () => {
                   </Typography>
                   <Typography level="h6" fontWeight="lg" color="success">
                     {showInfo
-                      ? utils.formatUsdDigit(totalEarnedRewards * tokenPrice)
+                      ? utils.formatUsdDigit(
+                          formatUnits(
+                            totalEarnedRewards
+                              .mul(
+                                parseUnits(
+                                  String(rewardToken?.token_price || 1)
+                                )
+                              )
+                              .div(parseUnits("1")),
+                            rewardToken?.token_decimal
+                          )
+                        )
                       : "********"}
                   </Typography>
                 </div>
@@ -120,10 +158,21 @@ const Overview = () => {
             </div>
           )}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-3 w-fit mx-auto gap-4 md:[&>*]:col-span-2 md:[&>*:last-child]:col-start-2 lg:[&>*]:col-span-1 lg:[&>*:last-child]:col-start-auto">
-          <FlexibleStakingCard hidden={isLoggedIn && !showInfo} />
-          <FixedStakingCard hidden={isLoggedIn && !showInfo} />
-          <NFTCard hidden={isLoggedIn && !showInfo} />
+        <div
+          className={clsx("grid grid-cols-1 mx-auto gap-4", {
+            "md:grid-cols-2": stakingPools.length >= 2,
+            "lg:grid-cols-3": stakingPools.length >= 3,
+          })}
+        >
+          {stakingPools.some((each) => each.type === "flexible") && (
+            <FlexibleStakingCard hidden={isLoggedIn && !showInfo} />
+          )}
+          {stakingPools.some((each) => each.type === "fixed") && (
+            <FixedStakingCard hidden={isLoggedIn && !showInfo} />
+          )}
+          {stakingPools.some((each) => each.type === "nft") && (
+            <NFTCard hidden={isLoggedIn && !showInfo} />
+          )}
         </div>
       </div>
       <Footer />
@@ -132,14 +181,9 @@ const Overview = () => {
 };
 
 export default function Page() {
-  const { isLoggedIn } = useLoginWidget();
-
   return (
     <main>
-      <TopBar
-        leftSlot={<Logo />}
-        rightSlot={!isLoggedIn ? <LoginPopover /> : <ProfileDropdown />}
-      />
+      <Header />
       <Suspense>
         <Overview />
       </Suspense>
