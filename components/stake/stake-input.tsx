@@ -4,15 +4,19 @@ import * as Slider from "@radix-ui/react-slider";
 import clsx from "clsx";
 import { utils } from "@consolelabs/mochi-formatter";
 import { TokenAmount, formatTokenAmount } from "@/utils/number";
+import { TokenImage } from "../token-image";
+import { Token } from "@/store/token-staking";
 
 interface Props {
+  token: Token | null;
   balance?: number;
   amount: TokenAmount;
+  convertedValue: number;
   setAmount: Dispatch<SetStateAction<TokenAmount>>;
 }
 
 export const StakeInput = (props: Props) => {
-  const { balance = 0, amount, setAmount } = props;
+  const { token, balance = 0, amount, convertedValue, setAmount } = props;
   const [percent, setPercent] = useState(0);
 
   const onMaxAmount = () => {
@@ -103,11 +107,8 @@ export const StakeInput = (props: Props) => {
             size="sm"
             className="bg-primary-soft pl-2 pr-2 text-text-primary !h-9 !rounded-lg"
           >
-            <Avatar
-              src="https://cdn.discordapp.com/emojis/1215543658854613002.png?size=240&quality=lossless"
-              className="w-[22px] h-[22px]"
-            />
-            ICY
+            <TokenImage symbol={token?.token_symbol || ""} size={22} />
+            {token?.token_symbol}
           </Button>
         </div>
         <div className="flex items-center space-x-2">
@@ -166,17 +167,12 @@ export const StakeInput = (props: Props) => {
         </div>
         <div className="flex items-center justify-between">
           <Typography className="!text-[13px] text-text-tertiary">
-            ≈ $0.00 USD
+            ≈ ${utils.formatDigit({ value: convertedValue })} USD
           </Typography>
           <Typography className="!text-[13px] text-text-tertiary">
             Balance:{" "}
             <button onClick={onMaxAmount}>
-              {utils.formatTokenDigit({
-                value: balance,
-                shorten: false,
-                fractionDigits: 2,
-              })}{" "}
-              ICY
+              {utils.formatDigit({ value: balance })} {token?.token_symbol}
             </button>
           </Typography>
         </div>

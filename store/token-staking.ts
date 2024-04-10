@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-interface Chain {
+export interface Chain {
   id?: number;
   name?: string;
   short_name?: string;
@@ -9,50 +9,53 @@ interface Chain {
   currency?: string;
 }
 
-interface Token {
-  token_address?: string;
-  token_name?: string;
-  token_symbol?: string;
-  token_decimal?: number;
+export interface Token {
+  token_address: string;
+  token_name: string;
+  token_symbol: string;
+  token_decimal: number;
+  token_abi: string;
   token_price?: number;
   token_chain_id?: Chain;
 }
 
-interface Contract {
-  contract_abi?: string;
-  contract_address?: string;
-  contract_chain?: Chain;
+export interface Contract {
+  contract_abi: string;
+  contract_address: string;
+  contract_chain: Chain;
 }
 
-interface StakingToken {
+export type PoolType = "flexible" | "fixed" | "nft";
+
+export interface Pool {
   guild_id?: string;
-  staking_token?: Token;
-  reward_token?: Token;
-  contract?: Contract;
+  staking_token: Token;
+  reward_token: Token;
+  contract: Contract;
   description?: string;
-  type?: "flexible" | "fixed" | "nft";
+  type: PoolType;
   rpc?: string;
 }
 
 interface State {
-  stakingTokens: StakingToken[];
+  stakingPools: Pool[];
 }
 
 interface Action {
-  fetchStakingTokens: () => Promise<void>;
+  fetchStakingPools: () => Promise<void>;
 }
 
 const initialState: State = {
-  stakingTokens: [],
+  stakingPools: [],
 };
 
 export const useTokenStaking = create<State & Action>((set, get) => ({
   ...initialState,
-  fetchStakingTokens: async () => {
+  fetchStakingPools: async () => {
     const response = await fetch(
       "https://api-preview.tono.console.so/api/v1/guilds/462663954813157376/community/token/staking"
     );
     const json = await response.json();
-    set({ stakingTokens: json?.data?.data || [] });
+    set({ stakingPools: json?.data?.data || [] });
   },
 }));

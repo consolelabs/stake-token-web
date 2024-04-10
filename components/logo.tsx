@@ -1,9 +1,10 @@
 import { ROUTES } from "@/constants/routes";
+import { Typography } from "@mochi-ui/core";
 import Link from "next/link";
 
 export const Logo = () => {
   return (
-    <Link href={ROUTES.HOME}>
+    <Link href={ROUTES.HOME} className="flex items-center space-x-2">
       <svg
         width="32"
         height="32"
@@ -31,6 +32,14 @@ export const Logo = () => {
           />
         </defs>
       </svg>
+      <span className="flex items-center">
+        <Typography level="p5" className="uppercase font-black">
+          tono
+        </Typography>
+        <Typography level="p5" className="font-black text-[#FFC500]">
+          .
+        </Typography>
+      </span>
     </Link>
   );
 };
