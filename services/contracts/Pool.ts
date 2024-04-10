@@ -1,45 +1,35 @@
 import { ChainProvider } from "@mochi-web3/login-widget";
-import { ERC20TokenInfo } from "..";
-import { BigNumber, BigNumberish } from "ethers";
-import {
-  TokenAmount,
-  formatTokenAmount,
-  getAmountWithDecimals,
-} from "@/utils/number";
-import { formatUnits } from "ethers/lib/utils";
+import { BigNumber, constants } from "ethers";
+import { getAmountWithDecimals } from "@/utils/number";
+import { Chain, Token, PoolType, Pool } from "@/store/token-staking";
 
-export const Abi = {
-  POOL_ICY_ICY:
-    '[{"inputs":[{"internalType":"address","name":"_rewardsDistributor","type":"address"},{"internalType":"address","name":"_rewardsToken","type":"address"},{"internalType":"address","name":"_stakingToken","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"target","type":"address"}],"name":"AddressEmptyCode","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"AddressInsufficientBalance","type":"error"},{"inputs":[],"name":"EnforcedPause","type":"error"},{"inputs":[],"name":"ExpectedPause","type":"error"},{"inputs":[],"name":"FailedInnerCall","type":"error"},{"inputs":[],"name":"ReentrancyGuardReentrantCall","type":"error"},{"inputs":[{"internalType":"address","name":"token","type":"address"}],"name":"SafeERC20FailedOperation","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Deposited","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"token","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Recovered","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"reward","type":"uint256"}],"name":"RewardAdded","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"reward","type":"uint256"}],"name":"RewardPaid","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"newDuration","type":"uint256"}],"name":"RewardsDurationUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Withdrawn","type":"event"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"deposit","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"earned","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getReward","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"getRewardForDuration","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastTimeRewardApplicable","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastUpdateTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"reward","type":"uint256"}],"name":"notifyRewardAmount","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"periodFinish","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"tokenAddress","type":"address"},{"internalType":"uint256","name":"tokenAmount","type":"uint256"}],"name":"recoverERC20","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"rewardPerToken","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardPerTokenStored","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardRate","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"rewards","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardsDistributor","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardsDuration","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardsToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_rewardsDuration","type":"uint256"}],"name":"setRewardsDuration","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"stakingToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"unstake","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"userRewardPerTokenPaid","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}]',
-  POOL_ICY_DFG: "",
+const getPoolKey = (
+  type: PoolType,
+  stakingTokenSymbol: string,
+  rewardTokenSymbol: string
+): string => {
+  if (type === "nft") return type;
+  return `${type}-${stakingTokenSymbol}-${rewardTokenSymbol}`;
 };
-
-export const PoolAddress = {
-  POOL_ICY_ICY: "0x92598F02cE6D26Fa320d3fDE73f4EE1059448d66",
-  POOL_ICY_DFG: "",
-};
-
-export type PoolType = "ICY_ICY" | "ICY_DFG";
-
-interface TokenInfo {
-  address: string;
-  decimals: number;
-}
 
 export class StakingPool {
   private static instances: Map<string, StakingPool> = new Map();
   private provider: ChainProvider;
   private abi: string;
   private address: string;
-  private stakingToken: TokenInfo;
-  private rewardToken: TokenInfo;
+  private stakingToken: Token;
+  private rewardToken: Token;
+  private chain: Chain;
+  private description: string;
   private sender: string = "";
 
   private constructor(
     _abi: string,
     _address: string,
-    _stakingToken: TokenInfo,
-    _rewardToken: TokenInfo,
+    _stakingToken: Token,
+    _rewardToken: Token,
+    _chain: Chain,
+    _description: string,
     _provider: ChainProvider
   ) {
     this.provider = _provider;
@@ -47,38 +37,38 @@ export class StakingPool {
     this.address = _address;
     this.stakingToken = _stakingToken;
     this.rewardToken = _rewardToken;
+    this.description = _description;
+    this.chain = _chain;
   }
 
   public static getInstance(
-    type: PoolType,
-    _provider: ChainProvider
-  ): StakingPool {
-    if (!StakingPool.instances.has(type)) {
-      if (type === "ICY_ICY") {
-        StakingPool.instances.set(
-          type,
-          new StakingPool(
-            Abi.POOL_ICY_ICY,
-            PoolAddress.POOL_ICY_ICY,
-            ERC20TokenInfo.ICY,
-            ERC20TokenInfo.ICY,
-            _provider
-          )
-        );
-      } else {
-        StakingPool.instances.set(
-          type,
-          new StakingPool(
-            Abi.POOL_ICY_DFG,
-            PoolAddress.POOL_ICY_DFG,
-            ERC20TokenInfo.ICY,
-            ERC20TokenInfo.DFG,
-            _provider
-          )
-        );
-      }
+    pool: Pool,
+    provider: ChainProvider
+  ): StakingPool | undefined {
+    const { type, reward_token, staking_token, description } = pool;
+
+    const { contract_abi, contract_address, contract_chain } = pool?.contract;
+
+    const poolKey = getPoolKey(
+      type,
+      staking_token.token_symbol,
+      reward_token.token_symbol
+    ).toLowerCase();
+    if (!StakingPool.instances.has(poolKey)) {
+      StakingPool.instances.set(
+        poolKey,
+        new StakingPool(
+          contract_abi,
+          contract_address,
+          staking_token,
+          reward_token,
+          contract_chain,
+          description || "",
+          provider
+        )
+      );
     }
-    return StakingPool.instances.get(type)!;
+    return StakingPool.instances.get(poolKey)!;
   }
 
   setSenderAddress(address: string) {
@@ -87,13 +77,6 @@ export class StakingPool {
 
   getAddress() {
     return this.address;
-  }
-
-  private getBigNumberValueByDecimals(
-    value: BigNumberish,
-    decimals: number
-  ): TokenAmount {
-    return formatTokenAmount(formatUnits(value, decimals));
   }
 
   async getPeriodFinishDate(): Promise<number> {
@@ -165,7 +148,7 @@ export class StakingPool {
     }
   }
 
-  async getRewardPerTokenStaked(): Promise<TokenAmount | undefined> {
+  async getRewardPerTokenStaked(): Promise<BigNumber | undefined> {
     try {
       const response: BigNumber[] = await this.provider.read({
         abi: this.abi,
@@ -175,19 +158,16 @@ export class StakingPool {
         from: this.sender,
       });
 
-      console.log(response);
+      console.log("getRewardPerTokenStaked:", response);
       if (response?.length && BigNumber.isBigNumber(response[0])) {
-        return this.getBigNumberValueByDecimals(
-          response[0].toBigInt(),
-          this.rewardToken.decimals
-        );
+        return response[0];
       }
     } catch (error) {
       console.error(error);
     }
   }
 
-  async getSenderStakedAmount(): Promise<TokenAmount | undefined> {
+  async getSenderStakedAmount(): Promise<BigNumber | undefined> {
     try {
       const response: BigNumber[] = await this.provider.read({
         abi: this.abi,
@@ -198,17 +178,14 @@ export class StakingPool {
       });
 
       if (response?.length && BigNumber.isBigNumber(response[0])) {
-        return this.getBigNumberValueByDecimals(
-          response[0].toBigInt(),
-          this.stakingToken.decimals
-        );
+        return response[0];
       }
     } catch (error) {
       console.error(error);
     }
   }
 
-  async getPoolTotalStakedAmount(): Promise<TokenAmount | undefined> {
+  async getPoolTotalStakedAmount(): Promise<BigNumber | undefined> {
     try {
       const response: BigNumber[] = await this.provider.read({
         abi: this.abi,
@@ -218,12 +195,8 @@ export class StakingPool {
         // from: this.sender,
       });
 
-      console.log(response);
       if (response?.length && BigNumber.isBigNumber(response[0])) {
-        return this.getBigNumberValueByDecimals(
-          response[0].toBigInt(),
-          this.stakingToken.decimals
-        );
+        return response[0];
       }
     } catch (error) {
       console.error(error);
@@ -231,7 +204,7 @@ export class StakingPool {
   }
 
   // total reward earned (claimed + unclaimed)
-  async getTotalRewardEarnedForAddress(): Promise<TokenAmount | undefined> {
+  async getTotalRewardEarnedForAddress(): Promise<BigNumber | undefined> {
     try {
       const response: BigNumber[] = await this.provider.read({
         abi: this.abi,
@@ -242,10 +215,7 @@ export class StakingPool {
       });
       console.log("getTotalRewardEarnedForAddress: ", response);
       if (response?.length && BigNumber.isBigNumber(response[0])) {
-        return this.getBigNumberValueByDecimals(
-          response[0].toBigInt(),
-          this.rewardToken.decimals
-        );
+        return response[0];
       }
     } catch (error) {
       console.error(error);
@@ -253,7 +223,7 @@ export class StakingPool {
   }
 
   // unclaimed reward for address
-  async getRewardAvailableForClaim(): Promise<TokenAmount | undefined> {
+  async getRewardAvailableForClaim(): Promise<BigNumber | undefined> {
     try {
       const response: BigNumber[] = await this.provider.read({
         abi: this.abi,
@@ -264,17 +234,14 @@ export class StakingPool {
       });
       console.log("getRewardAvailableForClaim: ", response);
       if (response?.length && BigNumber.isBigNumber(response[0])) {
-        return this.getBigNumberValueByDecimals(
-          response[0].toBigInt(),
-          this.rewardToken.decimals
-        );
+        return response[0];
       }
     } catch (error) {
       console.error(error);
     }
   }
 
-  async getCurrentRewardRate(): Promise<TokenAmount | undefined> {
+  async getCurrentRewardRate(): Promise<BigNumber | undefined> {
     try {
       const response: BigNumber[] = await this.provider.read({
         abi: this.abi,
@@ -283,18 +250,8 @@ export class StakingPool {
         to: this.address,
         // from: this.sender,
       });
-      console.log(
-        "getCurrentRewardRate: ",
-        this.getBigNumberValueByDecimals(
-          response[0].toBigInt(),
-          this.rewardToken.decimals
-        )
-      );
       if (response?.length && BigNumber.isBigNumber(response[0])) {
-        return this.getBigNumberValueByDecimals(
-          response[0].toBigInt(),
-          this.rewardToken.decimals
-        );
+        return response[0];
       }
     } catch (error) {
       console.error(error);
@@ -302,28 +259,23 @@ export class StakingPool {
   }
 
   // assume you staked 1 token
-  async calculateRealtimeAPR(): Promise<number> {
-    let estimateAPR: number;
+  async calculateRealtimeAPR(): Promise<BigNumber> {
     const daysInYear = 365;
     const rewardRate = await this.getCurrentRewardRate();
     const rewardDuration = await this.getRewardDuration();
-    if (rewardRate?.value && rewardDuration) {
-      const yearEstimateEarned = rewardRate.value * rewardDuration * daysInYear;
-      estimateAPR = Math.trunc(yearEstimateEarned * 100);
+    if (rewardRate && rewardDuration) {
+      const estimateAPR = rewardRate.mul(rewardDuration).mul(daysInYear * 100);
       return estimateAPR;
     }
-    return 0;
+    return constants.Zero;
   }
 
   /**
    * WRITE METHODS
    */
   async stake(amount: number): Promise<string | undefined> {
-    const { decimals } = this.stakingToken;
-    const amountWithDecimals = getAmountWithDecimals(
-      amount,
-      decimals
-    ).toString();
+    const { token_decimal } = this.stakingToken;
+    const amountWithDecimals = getAmountWithDecimals(amount, token_decimal);
     try {
       const txHash = await this.provider.write({
         abi: this.abi,

@@ -5,17 +5,38 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   ProfileBadge,
-  Typography,
-  DropdownMenuLabel,
   DropdownMenuPortal,
+  Button,
+  Modal,
+  ModalPortal,
+  ModalOverlay,
+  ModalContent,
+  ModalTrigger,
+  Avatar,
+  Typography,
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
 } from "@mochi-ui/core";
-import { useLoginWidget } from "@mochi-web3/login-widget";
-import { ReactNode } from "react";
-import { version as appVersion } from "../package.json";
+import { LoginWidget, useLoginWidget } from "@mochi-web3/login-widget";
+import { ReactNode, useEffect } from "react";
 import { utils } from "@consolelabs/mochi-formatter";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import { useFlexibleStaking } from "@/store/flexible-staking";
+import Image from "next/image";
+import {
+  Discord,
+  LifeBuoySolid,
+  WalletAddSolid,
+  WalletSolid,
+  X,
+} from "@mochi-ui/icons";
+import { useWallet } from "@/store/wallet";
+import { truncateWallet } from "@/utils/string";
+import { formatUnits } from "ethers/lib/utils";
+import { constants } from "ethers";
 
 export default function ProfileDropdown({
   children,
@@ -24,7 +45,7 @@ export default function ProfileDropdown({
   children?: ReactNode;
   className?: string;
 }) {
-  const { isLoggedIn, profile, logout } = useLoginWidget();
+  const { isLoggedIn, profile, wallets, logout } = useLoginWidget();
   const { push } = useRouter();
   const { reset: resetFlexibleStaking } = useFlexibleStaking();
 
@@ -45,6 +66,15 @@ export default function ProfileDropdown({
       ) : null;
   }
 
+  const { walletsWithBalance, getConnectedWallet, initializeWallets } =
+    useWallet();
+  const connectedWallet = getConnectedWallet();
+
+  useEffect(() => {
+    if (!wallets.length) return;
+    initializeWallets(wallets);
+  }, [initializeWallets, wallets]);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className={className} asChild>
@@ -60,26 +90,163 @@ export default function ProfileDropdown({
             bottom: 32,
           }}
         >
+          <Accordion
+            type="single"
+            collapsible
+            defaultValue="profile"
+            className="!p-0 shadow-none"
+          >
+            <AccordionItem value="profile">
+              <AccordionTrigger
+                leftIcon={<Avatar src="" className="flex" />}
+                className="flex-col items-start"
+                wrapperClassName=""
+              >
+                <Typography level="p5">
+                  {connectedWallet?.address
+                    ? truncateWallet(connectedWallet.address)
+                    : utils.string.formatAddressUsername(
+                        profile?.profile_name || "unknown"
+                      )}
+                </Typography>
+                <Typography level="p6" className="text-text-tertiary">
+                  {utils.formatUsdDigit(
+                    formatUnits(connectedWallet?.balance || constants.Zero)
+                  )}
+                </Typography>
+              </AccordionTrigger>
+              <AccordionContent>
+                {connectedWallet ? (
+                  walletsWithBalance.map((w) => (
+                    <DropdownMenuItem
+                      key={w.address}
+                      leftIcon={<Avatar src="" size="xs" />}
+                      rightExtra={
+                        w.connectionStatus === "connected" ? (
+                          <Typography level="p6" color="success">
+                            Active
+                          </Typography>
+                        ) : undefined
+                      }
+                    >
+                      <Typography level="p5">
+                        {truncateWallet(w.address)}
+                      </Typography>
+                      <Typography level="p6" className="text-text-tertiary">
+                        {utils.formatUsdDigit(
+                          formatUnits(w.balance || constants.Zero)
+                        )}
+                      </Typography>
+                    </DropdownMenuItem>
+                  ))
+                ) : (
+                  <DropdownMenuItem asChild>
+                    <Modal>
+                      <ModalTrigger asChild>
+                        <Button
+                          variant="soft"
+                          className="w-full !justify-center"
+                        >
+                          <WalletAddSolid />
+                          Connect Wallet
+                        </Button>
+                      </ModalTrigger>
+                      <ModalPortal>
+                        <ModalOverlay />
+                        <ModalContent>
+                          <LoginWidget raw onchain chain="evm" />
+                        </ModalContent>
+                      </ModalPortal>
+                    </Modal>
+                  </DropdownMenuItem>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+          {/* <DropdownMenuItem leftIcon={<Avatar src="" />}>
+            <Typography level="p5">
+              {connectedWallet?.address
+                ? truncateWallet(connectedWallet.address)
+                : utils.string.formatAddressUsername(
+                    profile?.profile_name || "unknown"
+                  )}
+            </Typography>
+            <Typography level="p6" className="text-text-tertiary">
+              {utils.formatUsdDigit(
+                formatUnits(connectedWallet?.balance || constants.Zero)
+              )}
+            </Typography>
+          </DropdownMenuItem> */}
+          {/* {connectedWallet ? (
+            walletsWithBalance.map((w) => (
+              <DropdownMenuItem
+                key={w.address}
+                leftIcon={<Avatar src="" size="xs" />}
+                rightExtra={
+                  w.connectionStatus === "connected" ? (
+                    <Typography level="p6" color="success">
+                      Active
+                    </Typography>
+                  ) : undefined
+                }
+              >
+                <Typography level="p5">{truncateWallet(w.address)}</Typography>
+                <Typography level="p6" className="text-text-tertiary">
+                  {utils.formatUsdDigit(
+                    formatUnits(w.balance || constants.Zero)
+                  )}
+                </Typography>
+              </DropdownMenuItem>
+            ))
+          ) : (
+            <DropdownMenuItem asChild>
+              <Modal>
+                <ModalTrigger asChild>
+                  <Button variant="soft" className="w-full !justify-center">
+                    <WalletAddSolid />
+                    Connect Wallet
+                  </Button>
+                </ModalTrigger>
+                <ModalPortal>
+                  <ModalOverlay />
+                  <ModalContent>
+                    <LoginWidget raw onchain chain="evm" />
+                  </ModalContent>
+                </ModalPortal>
+              </Modal>
+            </DropdownMenuItem>
+          )} */}
+          <DropdownMenuItem leftIcon={<WalletSolid className="w-5 h-5" />}>
+            My Earn
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem leftIcon={<LifeBuoySolid className="w-5 h-5" />}>
+            Support
+          </DropdownMenuItem>
+          <DropdownMenuItem leftIcon={<X className="w-5 h-5" />}>
+            Follow us
+          </DropdownMenuItem>
+          <DropdownMenuItem leftIcon={<Discord className="w-5 h-5" />}>
+            Join Community
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
-            hasPaddingLeft
             onClick={() => {
               resetFlexibleStaking();
               logout();
               push(ROUTES.HOME);
             }}
+            leftIcon={
+              <Image
+                src="/svg/exit.svg"
+                width={20}
+                height={20}
+                alt="disconnect"
+              />
+            }
           >
-            Logout
+            Disconnect
           </DropdownMenuItem>
-          <DropdownMenuSeparator className="hidden lg:flex" />
-          <DropdownMenuSeparator className="lg:hidden !mt-auto" />
-          <DropdownMenuLabel className="flex flex-col">
-            <Typography level="p6" color="textDisabled" fontWeight="sm">
-              Powered by Console Labs
-            </Typography>
-            <Typography level="p6" color="textDisabled" fontWeight="sm">
-              Version {appVersion}
-            </Typography>
-          </DropdownMenuLabel>
         </DropdownMenuContent>
       </DropdownMenuPortal>
     </DropdownMenu>

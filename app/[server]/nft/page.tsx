@@ -1,11 +1,9 @@
 "use client";
 
 import { Footer } from "@/components/footer";
-import { LoginPopover } from "@/components/login-popover";
-import { Logo } from "@/components/logo";
+import { Header } from "@/components/header/header";
 import { NFTList } from "@/components/nft/nft-list";
-import ProfileDropdown from "@/components/profile-dropdown";
-import { Button, Separator, Table, TopBar, Typography } from "@mochi-ui/core";
+import { Button, Separator, Typography } from "@mochi-ui/core";
 import { ArrowTopRightLine } from "@mochi-ui/icons";
 import { useLoginWidget } from "@mochi-web3/login-widget";
 import Image from "next/image";
@@ -176,14 +174,9 @@ const NFT = () => {
 };
 
 export default function Page() {
-  const { isLoggedIn } = useLoginWidget();
-
   return (
     <main>
-      <TopBar
-        leftSlot={<Logo />}
-        rightSlot={!isLoggedIn ? <LoginPopover /> : <ProfileDropdown />}
-      />
+      <Header />
       <Suspense>
         <NFT />
       </Suspense>
