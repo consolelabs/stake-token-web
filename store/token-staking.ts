@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import wretch from "wretch";
 
 export interface Chain {
   id?: number;
@@ -52,10 +53,11 @@ const initialState: State = {
 export const useTokenStaking = create<State & Action>((set, get) => ({
   ...initialState,
   fetchStakingPools: async () => {
-    const response = await fetch(
+    const res = await wretch(
       "https://api-preview.tono.console.so/api/v1/guilds/462663954813157376/community/token/staking"
-    );
-    const json = await response.json();
-    set({ stakingPools: json?.data?.data || [] });
+    )
+      .get()
+      .json((res) => res?.data?.data);
+    set({ stakingPools: res || [] });
   },
 }));
