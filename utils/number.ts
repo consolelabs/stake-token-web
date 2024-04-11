@@ -1,4 +1,5 @@
 import { utils } from "@consolelabs/mochi-formatter";
+import BigNumber from "bignumber.js";
 
 export type TokenAmount = {
   value: number;
@@ -17,4 +18,15 @@ export function formatTokenAmount(amount: string | number): TokenAmount {
     value: formatNumber,
     display: roundedAmount,
   };
+}
+
+export function getAmountWithDecimals(
+  amount: number,
+  decimals: number
+): string {
+  return new BigNumber(10)
+    .pow(decimals)
+    .multipliedBy(amount)
+    .toPrecision(100, 1)
+    .split(".")[0]; // fix invalid input amount err caused by exponential notation
 }
