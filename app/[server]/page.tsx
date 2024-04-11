@@ -158,7 +158,7 @@ const Overview = () => {
             </div>
           )}
         </div>
-        <div
+        {/* <div
           className={clsx("grid grid-cols-1 mx-auto gap-4", {
             "md:grid-cols-2": stakingPools.length >= 2,
             "lg:grid-cols-3": stakingPools.length >= 3,
@@ -173,7 +173,7 @@ const Overview = () => {
           {stakingPools.some((each) => each.type === "nft") && (
             <NFTCard hidden={isLoggedIn && !showInfo} />
           )}
-        </div>
+        </div> */}
       </div>
       <Footer />
     </div>
