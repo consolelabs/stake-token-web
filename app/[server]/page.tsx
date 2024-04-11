@@ -39,8 +39,8 @@ const Overview = () => {
   }, [balance, showInfo]);
 
   return (
-    <div className="overflow-y-auto h-[calc(100vh-56px)]">
-      <div className="max-w-6xl pt-12 pb-16 px-4 mx-auto space-y-14">
+    <div className="overflow-y-auto h-[calc(100vh-56px)] flex flex-col">
+      <div className="max-w-6xl pt-12 pb-16 px-4 mx-auto space-y-14 flex-1">
         <div className="flex gap-8 flex-col lg:flex-row items-center lg:items-start">
           {!isLoggedIn ? (
             <Typography level="h3" fontWeight="lg" className="flex-1 pb-3">
@@ -158,7 +158,7 @@ const Overview = () => {
             </div>
           )}
         </div>
-        <div
+        {/* <div
           className={clsx("grid grid-cols-1 mx-auto gap-4", {
             "md:grid-cols-2": stakingPools.length >= 2,
             "lg:grid-cols-3": stakingPools.length >= 3,
@@ -173,7 +173,7 @@ const Overview = () => {
           {stakingPools.some((each) => each.type === "nft") && (
             <NFTCard hidden={isLoggedIn && !showInfo} />
           )}
-        </div>
+        </div> */}
       </div>
       <Footer />
     </div>
