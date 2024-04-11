@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useState } from "react";
 import { Header } from "@/components/header/header";
 import {
   Button,
@@ -15,22 +15,21 @@ import { LoginWidget } from "@mochi-web3/login-widget";
 import { useSearchParams } from "next/navigation";
 import { WretchError } from "wretch";
 import { API } from "@/constants/api";
+import { CheckCircleHalfColoredLine } from "@mochi-ui/icons";
 
 const Verify = () => {
   const { isOpen, onOpenChange } = useDisclosure();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [verified, setVerified] = useState(false);
-  const [error, _setError] = useState("");
-  const setError = useCallback(
-    (e: WretchError) => {
-      _setError(e.json?.msg ?? "Something went wrong");
-    },
-    [_setError]
-  );
+  const [error, setError] = useState("");
 
   const code = searchParams.get("code");
   const guild_id = searchParams.get("guild_id");
+  const channel_id = searchParams.get("channel_id");
+  const author_id = searchParams.get("author_id");
+  const request_platform = searchParams.get("platform");
+  const request_application = searchParams.get("application");
 
   if (error) {
     return (
@@ -47,13 +46,16 @@ const Verify = () => {
 
   if (verified) {
     return (
-      <div className="py-8 px-8 mx-auto md:px-16 md:max-w-2xl min-h-[calc(100vh-56px)] flex flex-col items-center justify-center">
-        <div className="text-2xl font-black text-center md:text-3xl">
-          <span className="uppercase text-tono-gradient">
-            Your wallet is verified! You can close this window
-          </span>{" "}
-          ✨
+      <div className="w-full min-h-[calc(100vh-56px)] flex flex-col items-center justify-center text-center px-4 space-y-6">
+        <div className="rounded-full bg-success-plain-active w-24 h-24 flex items-center justify-center border-[16px] border-success-soft">
+          <CheckCircleHalfColoredLine className="w-10 h-10 text-success-solid" />
         </div>
+        <p className="text-2xl sm:text-3.5xl sm:leading-9 font-semibold text-text-primary">
+          You have connected your wallet.
+        </p>
+        <p className="text-base sm:text-lg text-text-primary">
+          Please close this window and go back to your Discord server.
+        </p>
       </div>
     );
   }
@@ -91,8 +93,13 @@ const Verify = () => {
                   if (!code || loading) return;
                   setLoading(true);
                   const payload = {
-                    wallet_address: address,
                     code,
+                    guild_id,
+                    channel_id,
+                    author_id,
+                    request_platform,
+                    request_application,
+                    wallet_address: address,
                     signature,
                     message:
                       "Please sign this message to prove wallet ownership",
@@ -105,31 +112,15 @@ const Verify = () => {
                       ""
                     )}`
                   )
-                    .badRequest(setError)
-                    .json(async (r) => {
-                      const user_discord_id = r.associated_accounts.find(
-                        (aa: any) => aa.platform === "discord"
-                      )?.platform_identifier;
-                      if (!guild_id) {
-                        setVerified(true);
-                      } else if (user_discord_id) {
-                        await API.MOCHI.post(
-                          {
-                            user_discord_id,
-                            guild_id,
-                          },
-                          `/verify/assign-role`
-                        )
-                          .badRequest(setError)
-                          .res(() => {
-                            setVerified(true);
-                          })
-                          .catch(setError)
-                          .finally(() => {
-                            setLoading(false);
-                            onOpenChange(false);
-                          });
-                      }
+                    .res(() => {
+                      setVerified(true);
+                    })
+                    .catch((e: WretchError) => {
+                      setError(e.json?.msg ?? "Something went wrong");
+                    })
+                    .finally(() => {
+                      setLoading(false);
+                      onOpenChange(false);
                     });
                 }}
               />
