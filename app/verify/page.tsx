@@ -8,7 +8,6 @@ import {
   ModalContent,
   ModalOverlay,
   ModalPortal,
-  Typography,
 } from "@mochi-ui/core";
 import { useDisclosure } from "@dwarvesf/react-hooks";
 import { LoginWidget } from "@mochi-web3/login-widget";
@@ -18,7 +17,7 @@ import { API } from "@/constants/api";
 import { CheckCircleHalfColoredLine } from "@mochi-ui/icons";
 
 const Verify = () => {
-  const { isOpen, onOpenChange } = useDisclosure();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [verified, setVerified] = useState(false);
@@ -62,16 +61,13 @@ const Verify = () => {
 
   return (
     <div className="w-full min-h-[calc(100vh-56px)] flex flex-col items-center justify-center text-center px-4 space-y-6">
-      <Typography
-        level="h4"
-        className="mb-4 text-center uppercase !font-black text-tono-gradient"
-      >
+      <p className="text-2xl sm:text-3.5xl sm:leading-9 font-semibold text-text-primary">
         Verify your wallet
-      </Typography>
-      <Typography level="p3" className="mb-3 text-center max-w-md">
+      </p>
+      <p className="text-base sm:text-lg text-text-primary max-w-md">
         Connect your wallet to verify and get full access to Tono with more
         exclusive privileges.
-      </Typography>
+      </p>
       <div>
         <Modal open={isOpen} onOpenChange={onOpenChange}>
           <ModalPortal>
@@ -90,7 +86,7 @@ const Verify = () => {
                   signature,
                   platform,
                 }) => {
-                  if (!code || loading) return;
+                  if (loading) return;
                   setLoading(true);
                   const payload = {
                     code,
@@ -127,7 +123,16 @@ const Verify = () => {
             </ModalContent>
           </ModalPortal>
         </Modal>
-        <Button color="primary" onClick={() => onOpenChange(true)}>
+        <Button
+          color="primary"
+          onClick={() => {
+            if (!code) {
+              setError("code not found");
+              return;
+            }
+            onOpen();
+          }}
+        >
           Verify
         </Button>
       </div>
