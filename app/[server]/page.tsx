@@ -18,7 +18,7 @@ import { Header } from "@/components/header/header";
 
 const Overview = () => {
   const { isLoggedIn } = useLoginWidget();
-  const { stakingPools, fetchStakingPools } = useTokenStaking();
+  const { stakingPools } = useTokenStaking();
   const {
     balance,
     stakedAmount,
@@ -27,10 +27,6 @@ const Overview = () => {
     rewardToken,
   } = useFlexibleStaking();
   const [showInfo, setShowInfo] = useState(false);
-
-  useEffect(() => {
-    fetchStakingPools();
-  }, [fetchStakingPools]);
 
   useEffect(() => {
     if (!!balance && !showInfo) {
@@ -158,7 +154,7 @@ const Overview = () => {
             </div>
           )}
         </div>
-        {/* <div
+        <div
           className={clsx("grid grid-cols-1 mx-auto gap-4", {
             "md:grid-cols-2": stakingPools.length >= 2,
             "lg:grid-cols-3": stakingPools.length >= 3,
@@ -173,7 +169,7 @@ const Overview = () => {
           {stakingPools.some((each) => each.type === "nft") && (
             <NFTCard hidden={isLoggedIn && !showInfo} />
           )}
-        </div> */}
+        </div>
       </div>
       <Footer />
     </div>
