@@ -1,5 +1,7 @@
 import { utils } from "@consolelabs/mochi-formatter";
 import BigNumber from "bignumber.js";
+import { BigNumber as EtherBigNumber, constants } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 
 export type TokenAmount = {
   value: number;
@@ -30,3 +32,11 @@ export function getAmountWithDecimals(
     .toPrecision(100, 1)
     .split(".")[0]; // fix invalid input amount err caused by exponential notation
 }
+
+export const getUsdAmount = (
+  amount: EtherBigNumber = constants.Zero,
+  price?: number
+) => {
+  if (!price) return amount;
+  return amount.mul(parseUnits(String(price || 1))).div(parseUnits("1"));
+};

@@ -3,6 +3,7 @@ import { BellSolid } from "@mochi-ui/icons";
 import { useLoginWidget } from "@mochi-web3/login-widget";
 import { LoginPopover } from "../login-popover";
 import ProfileDropdown from "../profile-dropdown";
+import { NetworkButton } from "./network-button";
 
 export const RightSlot = () => {
   const { isLoggedIn } = useLoginWidget();
@@ -13,6 +14,7 @@ export const RightSlot = () => {
 
   return (
     <div className="flex items-center space-x-3">
+      <NetworkButton />
       <IconButton
         label="notification"
         variant="outline"
