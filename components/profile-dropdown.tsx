@@ -7,11 +7,6 @@ import {
   ProfileBadge,
   DropdownMenuPortal,
   Button,
-  Modal,
-  ModalPortal,
-  ModalOverlay,
-  ModalContent,
-  ModalTrigger,
   Avatar,
   Typography,
   Accordion,
@@ -27,16 +22,154 @@ import { ROUTES } from "@/constants/routes";
 import { useFlexibleStaking } from "@/store/flexible-staking";
 import Image from "next/image";
 import {
+  ChevronLeftLine,
   Discord,
   LifeBuoySolid,
   WalletAddSolid,
   WalletSolid,
   X,
 } from "@mochi-ui/icons";
-import { useWallet } from "@/store/wallet";
+import { useWalletBalance } from "@/store/wallet-balance";
 import { truncateWallet } from "@/utils/string";
 import { formatUnits } from "ethers/lib/utils";
-import { constants } from "ethers";
+import { getUsdAmount } from "@/utils/number";
+import { useDisclosure } from "@dwarvesf/react-hooks";
+
+const DropdownContent = () => {
+  const { profile, logout } = useLoginWidget();
+  const { push } = useRouter();
+  const { walletsWithBalance, mochiWallet, getConnectedWallet } =
+    useWalletBalance();
+  const {
+    reset: resetFlexibleStaking,
+    balance: flexibleStakingBalance,
+    stakingToken: flexibleStakingToken,
+  } = useFlexibleStaking();
+  const {
+    isOpen: isOpenLoginWidget,
+    onOpen: onOpenLoginWidget,
+    onClose: onCloseLoginWidget,
+  } = useDisclosure();
+
+  const connectedWallet = getConnectedWallet();
+  const totalBalance = formatUnits(
+    getUsdAmount(flexibleStakingBalance, flexibleStakingToken?.token_price),
+    flexibleStakingToken?.token_decimal
+  );
+
+  if (isOpenLoginWidget) {
+    return (
+      <>
+        <Button
+          variant="link"
+          color="neutral"
+          onClick={onCloseLoginWidget}
+          className="!p-0"
+        >
+          <ChevronLeftLine className="w-4 h-4" />
+          Back
+        </Button>
+        <LoginWidget raw onchain chain="evm" onClose={onCloseLoginWidget} />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Accordion type="single" collapsible className="!p-0 shadow-none">
+        <AccordionItem value="profile">
+          <AccordionTrigger
+            leftIcon={<Avatar src="" className="flex" />}
+            className="flex-col items-start"
+            wrapperClassName=""
+          >
+            <Typography level="p5">
+              {connectedWallet?.address
+                ? truncateWallet(connectedWallet.address)
+                : utils.string.formatAddressUsername(
+                    profile?.profile_name || "unknown"
+                  )}
+            </Typography>
+            <Typography level="p6" className="text-text-tertiary">
+              {utils.formatUsdDigit(totalBalance)}
+            </Typography>
+          </AccordionTrigger>
+          <AccordionContent className="!p-0">
+            {mochiWallet || walletsWithBalance.length ? (
+              [
+                ...(mochiWallet ? [mochiWallet] : []),
+                ...walletsWithBalance,
+              ].map((w) => (
+                <DropdownMenuItem
+                  key={w.address}
+                  leftIcon={<Avatar src={w.avatar || ""} size="xs" />}
+                  rightExtra={
+                    w.connectionStatus === "connected" ? (
+                      <Typography level="p6" color="success">
+                        Active
+                      </Typography>
+                    ) : undefined
+                  }
+                >
+                  <Typography level="p5">
+                    {truncateWallet(w.address)}
+                  </Typography>
+                  <Typography level="p6" className="text-text-tertiary">
+                    {utils.formatUsdDigit(
+                      formatUnits(
+                        getUsdAmount(
+                          w.flexibleStaking?.balance,
+                          w.flexibleStaking?.price
+                        )
+                      )
+                    )}
+                  </Typography>
+                </DropdownMenuItem>
+              ))
+            ) : (
+              <DropdownMenuItem asChild onSelect={(e) => e.preventDefault()}>
+                <Button
+                  variant="soft"
+                  className="w-full !justify-center"
+                  onClick={onOpenLoginWidget}
+                >
+                  <WalletAddSolid />
+                  Connect Wallet
+                </Button>
+              </DropdownMenuItem>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      <DropdownMenuItem leftIcon={<WalletSolid className="w-5 h-5" />}>
+        My Earn
+      </DropdownMenuItem>
+      <DropdownMenuSeparator className="min-h-[1px]" />
+      <DropdownMenuItem leftIcon={<LifeBuoySolid className="w-5 h-5" />}>
+        Support
+      </DropdownMenuItem>
+      <DropdownMenuItem leftIcon={<X className="w-5 h-5" />}>
+        Follow us
+      </DropdownMenuItem>
+      <DropdownMenuItem leftIcon={<Discord className="w-5 h-5" />}>
+        Join Community
+      </DropdownMenuItem>
+      <DropdownMenuSeparator className="min-h-[1px]" />
+      <DropdownMenuItem
+        onClick={() => {
+          resetFlexibleStaking();
+          logout();
+          push(ROUTES.HOME);
+        }}
+        leftIcon={
+          <Image src="/svg/exit.svg" width={20} height={20} alt="disconnect" />
+        }
+      >
+        Disconnect
+      </DropdownMenuItem>
+    </>
+  );
+};
 
 export default function ProfileDropdown({
   children,
@@ -45,9 +178,8 @@ export default function ProfileDropdown({
   children?: ReactNode;
   className?: string;
 }) {
-  const { isLoggedIn, profile, wallets, logout } = useLoginWidget();
-  const { push } = useRouter();
-  const { reset: resetFlexibleStaking } = useFlexibleStaking();
+  const { isLoggedIn, profile, wallets } = useLoginWidget();
+  const { initializeWallets, initializeMochiWallet } = useWalletBalance();
 
   let triggerRender = null;
   if (children) {
@@ -66,14 +198,25 @@ export default function ProfileDropdown({
       ) : null;
   }
 
-  const { walletsWithBalance, getConnectedWallet, initializeWallets } =
-    useWallet();
-  const connectedWallet = getConnectedWallet();
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    initializeWallets(wallets);
+  }, [initializeWallets, isLoggedIn, wallets]);
 
   useEffect(() => {
-    if (!wallets.length) return;
-    initializeWallets(wallets);
-  }, [initializeWallets, wallets]);
+    if (!isLoggedIn) return;
+    initializeMochiWallet({
+      name: profile?.profile_name,
+      id: profile?.id,
+      avatar: profile?.avatar,
+    });
+  }, [
+    initializeMochiWallet,
+    isLoggedIn,
+    profile?.avatar,
+    profile?.id,
+    profile?.profile_name,
+  ]);
 
   return (
     <DropdownMenu>
@@ -90,163 +233,7 @@ export default function ProfileDropdown({
             bottom: 32,
           }}
         >
-          <Accordion
-            type="single"
-            collapsible
-            defaultValue="profile"
-            className="!p-0 shadow-none"
-          >
-            <AccordionItem value="profile">
-              <AccordionTrigger
-                leftIcon={<Avatar src="" className="flex" />}
-                className="flex-col items-start"
-                wrapperClassName=""
-              >
-                <Typography level="p5">
-                  {connectedWallet?.address
-                    ? truncateWallet(connectedWallet.address)
-                    : utils.string.formatAddressUsername(
-                        profile?.profile_name || "unknown"
-                      )}
-                </Typography>
-                <Typography level="p6" className="text-text-tertiary">
-                  {utils.formatUsdDigit(
-                    formatUnits(connectedWallet?.balance || constants.Zero)
-                  )}
-                </Typography>
-              </AccordionTrigger>
-              <AccordionContent>
-                {connectedWallet ? (
-                  walletsWithBalance.map((w) => (
-                    <DropdownMenuItem
-                      key={w.address}
-                      leftIcon={<Avatar src="" size="xs" />}
-                      rightExtra={
-                        w.connectionStatus === "connected" ? (
-                          <Typography level="p6" color="success">
-                            Active
-                          </Typography>
-                        ) : undefined
-                      }
-                    >
-                      <Typography level="p5">
-                        {truncateWallet(w.address)}
-                      </Typography>
-                      <Typography level="p6" className="text-text-tertiary">
-                        {utils.formatUsdDigit(
-                          formatUnits(w.balance || constants.Zero)
-                        )}
-                      </Typography>
-                    </DropdownMenuItem>
-                  ))
-                ) : (
-                  <DropdownMenuItem asChild>
-                    <Modal>
-                      <ModalTrigger asChild>
-                        <Button
-                          variant="soft"
-                          className="w-full !justify-center"
-                        >
-                          <WalletAddSolid />
-                          Connect Wallet
-                        </Button>
-                      </ModalTrigger>
-                      <ModalPortal>
-                        <ModalOverlay />
-                        <ModalContent>
-                          <LoginWidget raw onchain chain="evm" />
-                        </ModalContent>
-                      </ModalPortal>
-                    </Modal>
-                  </DropdownMenuItem>
-                )}
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-          {/* <DropdownMenuItem leftIcon={<Avatar src="" />}>
-            <Typography level="p5">
-              {connectedWallet?.address
-                ? truncateWallet(connectedWallet.address)
-                : utils.string.formatAddressUsername(
-                    profile?.profile_name || "unknown"
-                  )}
-            </Typography>
-            <Typography level="p6" className="text-text-tertiary">
-              {utils.formatUsdDigit(
-                formatUnits(connectedWallet?.balance || constants.Zero)
-              )}
-            </Typography>
-          </DropdownMenuItem> */}
-          {/* {connectedWallet ? (
-            walletsWithBalance.map((w) => (
-              <DropdownMenuItem
-                key={w.address}
-                leftIcon={<Avatar src="" size="xs" />}
-                rightExtra={
-                  w.connectionStatus === "connected" ? (
-                    <Typography level="p6" color="success">
-                      Active
-                    </Typography>
-                  ) : undefined
-                }
-              >
-                <Typography level="p5">{truncateWallet(w.address)}</Typography>
-                <Typography level="p6" className="text-text-tertiary">
-                  {utils.formatUsdDigit(
-                    formatUnits(w.balance || constants.Zero)
-                  )}
-                </Typography>
-              </DropdownMenuItem>
-            ))
-          ) : (
-            <DropdownMenuItem asChild>
-              <Modal>
-                <ModalTrigger asChild>
-                  <Button variant="soft" className="w-full !justify-center">
-                    <WalletAddSolid />
-                    Connect Wallet
-                  </Button>
-                </ModalTrigger>
-                <ModalPortal>
-                  <ModalOverlay />
-                  <ModalContent>
-                    <LoginWidget raw onchain chain="evm" />
-                  </ModalContent>
-                </ModalPortal>
-              </Modal>
-            </DropdownMenuItem>
-          )} */}
-          <DropdownMenuItem leftIcon={<WalletSolid className="w-5 h-5" />}>
-            My Earn
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem leftIcon={<LifeBuoySolid className="w-5 h-5" />}>
-            Support
-          </DropdownMenuItem>
-          <DropdownMenuItem leftIcon={<X className="w-5 h-5" />}>
-            Follow us
-          </DropdownMenuItem>
-          <DropdownMenuItem leftIcon={<Discord className="w-5 h-5" />}>
-            Join Community
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => {
-              resetFlexibleStaking();
-              logout();
-              push(ROUTES.HOME);
-            }}
-            leftIcon={
-              <Image
-                src="/svg/exit.svg"
-                width={20}
-                height={20}
-                alt="disconnect"
-              />
-            }
-          >
-            Disconnect
-          </DropdownMenuItem>
+          <DropdownContent />
         </DropdownMenuContent>
       </DropdownMenuPortal>
     </DropdownMenu>
