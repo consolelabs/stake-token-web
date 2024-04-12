@@ -15,7 +15,7 @@ import { useDisclosure } from "@dwarvesf/react-hooks";
 import { MinusLine, PlusCircleSolid, PlusLine, Spinner } from "@mochi-ui/icons";
 import { FlexibleStakeModal } from "../stake/flexible/flexible-stake-modal";
 import { useFlexibleStaking } from "@/store/flexible-staking";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Countdown } from "./Countdown";
 import { retry } from "@/utils/retry";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
@@ -131,18 +131,6 @@ export const FlexibleStakingCard = (props: Props) => {
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  // get connected wallet address or all wallet addresses
-  const addresses = useMemo(
-    () =>
-      wallets.some((w) => w.connectionStatus === "connected")
-        ? [
-            wallets.find((w) => w.connectionStatus === "connected")?.address ||
-              "",
-          ]
-        : wallets.map((w) => w.address),
-    [wallets]
-  );
 
   useEffect(() => {
     initializeValues();

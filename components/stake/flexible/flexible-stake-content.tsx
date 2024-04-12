@@ -6,16 +6,16 @@ import {
   DrawerPortal,
   DrawerTrigger,
   Typography,
-  toast,
 } from "@mochi-ui/core";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { TokenAmount } from "@/utils/number";
 import { StakeInput } from "../stake-input";
 import { useFlexibleStaking } from "@/store/flexible-staking";
 import { Spinner } from "@mochi-ui/icons";
-import { LoginWidget, useLoginWidget } from "@mochi-web3/login-widget";
+import { LoginWidget } from "@mochi-web3/login-widget";
 import { utils } from "@consolelabs/mochi-formatter";
-import { formatUnits, parseUnits } from "ethers/lib/utils";
+import { formatUnits } from "ethers/lib/utils";
+import { useWalletNetwork } from "@/hooks/useWalletNetwork";
 
 interface Props {
   onStake: (amount: number) => Promise<void>;
@@ -26,17 +26,15 @@ interface Props {
 
 export const FlexibleStakeContent = (props: Props) => {
   const { onStake, onApprove, loading, container } = props;
-  const { isLoggedIn } = useLoginWidget();
-  const { balance, allowance, apr, stakingToken, provider } =
-    useFlexibleStaking();
+  const { balance, allowance, apr, stakingToken } = useFlexibleStaking();
   const chain = useMemo(() => stakingToken?.token_chain_id, [stakingToken]);
   const [amount, setAmount] = useState<TokenAmount>({
     value: 0,
     display: "",
   });
-  const [isBaseChain, setIsBaseChain] = useState(
-    provider?.chainId === `0x${chain?.id?.toString(16)}`
-  );
+  const { isConnected, isCorrectNetwork, changeNetwork } = useWalletNetwork({
+    chain,
+  });
 
   const convertedBalance = Number(
     formatUnits(balance, stakingToken?.token_decimal)
@@ -44,62 +42,6 @@ export const FlexibleStakeContent = (props: Props) => {
   const convertedAllowance = Number(
     formatUnits(allowance, stakingToken?.token_decimal)
   );
-  const isConnected = isLoggedIn && !!provider;
-  const changeNetwork = async () => {
-    try {
-      await provider?.provider.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: `0x${chain?.id?.toString(16)}` }],
-      });
-      const newChainId = await provider?.provider.request({
-        method: "eth_chainId",
-      });
-      setIsBaseChain(newChainId === `0x${chain?.id?.toString(16)}`);
-    } catch (switchError: any) {
-      // This error code indicates that the chain has not been added to MetaMask.
-      if (switchError.code === 4902) {
-        try {
-          await provider?.provider.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainId: `0x${chain?.id?.toString(16)}`,
-                chainName: chain?.name,
-                rpcUrls: [chain?.rpc],
-                nativeCurrency: {
-                  name: chain?.currency,
-                  symbol: chain?.currency,
-                  decimals: 18,
-                },
-              },
-            ],
-          });
-        } catch (addError: any) {
-          toast({
-            scheme: "danger",
-            title: "Error",
-            description:
-              typeof addError?.message === "string"
-                ? addError.message
-                : "Failed to add Base network",
-          });
-        }
-      } else {
-        toast({
-          scheme: "danger",
-          title: "Error",
-          description:
-            typeof switchError?.message === "string"
-              ? switchError.message
-              : "Failed to switch to Base network",
-        });
-      }
-    }
-  };
-
-  useEffect(() => {
-    setIsBaseChain(provider?.chainId === `0x${chain?.id?.toString(16)}`);
-  }, [chain?.id, provider?.chainId]);
 
   return (
     <div className="flex flex-col">
@@ -126,7 +68,7 @@ export const FlexibleStakeContent = (props: Props) => {
           token={stakingToken}
         />
       </div>
-      {isConnected && isBaseChain ? (
+      {isConnected && isCorrectNetwork ? (
         <Button
           size="lg"
           disabled={
@@ -147,9 +89,9 @@ export const FlexibleStakeContent = (props: Props) => {
               ? "Stake"
               : "Approve Spending Cap")}
         </Button>
-      ) : isConnected && !isBaseChain ? (
+      ) : isConnected && !isCorrectNetwork ? (
         <Button size="lg" className="mt-3" onClick={changeNetwork}>
-          Change Network to Base
+          Switch to Base
         </Button>
       ) : (
         <Drawer anchor="bottom">
