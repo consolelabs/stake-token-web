@@ -8,3 +8,4 @@ export const MOCHI_PAY_API = `${
 export const MOCHI_API = `${
   process.env.NEXT_PUBLIC_MOCHI_API_HOST || "mochi-api"
 }/api/v1`;
+export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN || "";
