@@ -32,9 +32,10 @@ export const FlexibleStakeContent = (props: Props) => {
     value: 0,
     display: "",
   });
-  const { isConnected, isCorrectNetwork, changeNetwork } = useWalletNetwork({
-    chain,
-  });
+  const { isConnected, isCorrectNetwork, changeNetwork, checkNetwork } =
+    useWalletNetwork({
+      chain,
+    });
 
   const convertedBalance = Number(
     formatUnits(balance, stakingToken?.token_decimal)
@@ -104,7 +105,14 @@ export const FlexibleStakeContent = (props: Props) => {
             <DrawerOverlay />
             <DrawerContent className="!w-full rounded-xl h-[calc(100%-60px)]">
               <div className="flex justify-center items-center h-full">
-                <LoginWidget raw onchain chain="evm" />
+                <LoginWidget
+                  raw
+                  onchain
+                  chain="evm"
+                  onWalletConnectSuccess={async () => {
+                    checkNetwork();
+                  }}
+                />
               </div>
             </DrawerContent>
           </DrawerPortal>
