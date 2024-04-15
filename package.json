@@ -19,6 +19,7 @@
     "@mochi-ui/theme": "^0.17.0",
     "@mochi-web3/login-widget": "^0.2.18",
     "@radix-ui/react-slider": "^1.1.2",
+    "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "bignumber.js": "^9.1.2",
     "clsx": "^2.1.0",
