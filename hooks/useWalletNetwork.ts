@@ -1,7 +1,7 @@
 import { tryCatch } from "@/utils/tryCatch";
 import { toast } from "@mochi-ui/core";
 import { ChainProvider, useLoginWidget } from "@mochi-web3/login-widget";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface Props {
   chain?: { id?: number; name?: string; rpc?: string; currency?: string };
@@ -21,9 +21,8 @@ export const useWalletNetwork = (props: Props) => {
     () => ({})
   );
 
-  const changeNetwork = async () => {
+  const changeNetwork = useCallback(async () => {
     if (!provider) return;
-    console.log("sdgdfg");
     try {
       await provider.request({
         method: "wallet_switchEthereumChain",
@@ -37,7 +36,7 @@ export const useWalletNetwork = (props: Props) => {
       // This error code indicates that the chain has not been added to MetaMask.
       if (switchError.code === 4902) {
         try {
-          await provider?.provider.request({
+          await provider.request({
             method: "wallet_addEthereumChain",
             params: [
               {
@@ -73,7 +72,21 @@ export const useWalletNetwork = (props: Props) => {
         });
       }
     }
+  }, [chain?.currency, chain?.id, chain?.name, chain?.rpc, provider]);
+
+  const [shouldChangeNetwork, setShouldChangeNetwork] = useState(false);
+  const checkNetwork = () => {
+    if (!isCorrectNetwork) {
+      setShouldChangeNetwork(true);
+    }
   };
+
+  useEffect(() => {
+    if (shouldChangeNetwork && !!provider) {
+      changeNetwork();
+      setShouldChangeNetwork(false);
+    }
+  }, [changeNetwork, provider, shouldChangeNetwork]);
 
   useEffect(() => {
     setIsCorrectNetwork(chainId === `0x${chain?.id?.toString(16)}`);
@@ -83,5 +96,6 @@ export const useWalletNetwork = (props: Props) => {
     isConnected: !!connectedAddress,
     isCorrectNetwork,
     changeNetwork,
+    checkNetwork,
   };
 };
