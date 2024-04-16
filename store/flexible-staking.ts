@@ -159,7 +159,7 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
       getStakedAmount,
       getPoolStakedAmount,
       getUnclaimedRewards,
-      getTotalEarnedRewards,
+      getClaimedRewards,
       getStartDate,
       getFinishDate,
     ] = await Promise.allSettled([
@@ -171,7 +171,7 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
       poolContract.getSenderStakedAmount(),
       poolContract.getPoolTotalStakedAmount(),
       poolContract.getRewardAvailableForClaim(),
-      poolContract.getTotalRewardEarnedForAddress(),
+      poolContract.getClaimedRewardsForAddress(),
       poolContract.getPeriodStartDate(),
       poolContract.getPeriodFinishDate(),
     ]);
@@ -190,7 +190,7 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
       getStakedAmount,
       getPoolStakedAmount,
       getUnclaimedRewards,
-      getTotalEarnedRewards,
+      getClaimedRewards,
     ].map((r) =>
       r.status === "fulfilled" ? r.value || constants.Zero : constants.Zero
     );

@@ -86,7 +86,6 @@ export class StakingPool {
         method: "periodFinish",
         args: [],
         to: this.address,
-        // from: this.sender,
       });
 
       if (response?.length && BigNumber.isBigNumber(response[0])) {
@@ -109,7 +108,6 @@ export class StakingPool {
         method: "lastUpdateTime",
         args: [],
         to: this.address,
-        // from: this.sender,
       });
 
       if (response?.length && BigNumber.isBigNumber(response[0])) {
@@ -132,7 +130,6 @@ export class StakingPool {
         method: "rewardsDuration",
         args: [],
         to: this.address,
-        // from: this.sender,
       });
 
       if (response?.length && BigNumber.isBigNumber(response[0])) {
@@ -155,7 +152,6 @@ export class StakingPool {
         method: "rewardPerToken",
         args: [],
         to: this.address,
-        from: this.sender,
       });
 
       console.log("getRewardPerTokenStaked:", response);
@@ -174,7 +170,6 @@ export class StakingPool {
         method: "balanceOf",
         args: [this.sender],
         to: this.address,
-        from: this.sender,
       });
 
       if (response?.length && BigNumber.isBigNumber(response[0])) {
@@ -192,7 +187,6 @@ export class StakingPool {
         method: "totalSupply",
         args: [],
         to: this.address,
-        // from: this.sender,
       });
 
       if (response?.length && BigNumber.isBigNumber(response[0])) {
@@ -204,16 +198,15 @@ export class StakingPool {
   }
 
   // total reward earned (claimed + unclaimed)
-  async getTotalRewardEarnedForAddress(): Promise<BigNumber | undefined> {
+  async getClaimedRewardsForAddress(): Promise<BigNumber | undefined> {
     try {
       const response: BigNumber[] = await this.provider.read({
         abi: this.abi,
-        method: "earned",
+        method: "claimedRewards",
         args: [this.sender],
         to: this.address,
-        from: this.sender,
       });
-      console.log("getTotalRewardEarnedForAddress: ", response);
+      console.log("getClaimedRewardsForAddress: ", response);
       if (response?.length && BigNumber.isBigNumber(response[0])) {
         return response[0];
       }
@@ -227,10 +220,9 @@ export class StakingPool {
     try {
       const response: BigNumber[] = await this.provider.read({
         abi: this.abi,
-        method: "rewards",
+        method: "earned",
         args: [this.sender],
         to: this.address,
-        from: this.sender,
       });
       console.log("getRewardAvailableForClaim: ", response);
       if (response?.length && BigNumber.isBigNumber(response[0])) {
@@ -248,7 +240,6 @@ export class StakingPool {
         method: "rewardRate",
         args: [],
         to: this.address,
-        // from: this.sender,
       });
       if (response?.length && BigNumber.isBigNumber(response[0])) {
         return response[0];
