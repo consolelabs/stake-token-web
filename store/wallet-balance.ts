@@ -143,7 +143,7 @@ export const useWalletBalance = create<State & Action>((set, get) => ({
       );
       const [getStakedAmount, getUnclaimedRewards] = await Promise.allSettled([
         poolContract.balanceOf(defaultAddress),
-        poolContract.rewards(defaultAddress),
+        poolContract.earned(defaultAddress),
       ]);
       setValues({
         balance: balances[index] || constants.Zero,
