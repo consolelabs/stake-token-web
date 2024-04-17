@@ -1,5 +1,5 @@
-import { Avatar, Button, Switch, Tooltip, Typography } from "@mochi-ui/core";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Button, Typography } from "@mochi-ui/core";
+import { Dispatch, SetStateAction, useState } from "react";
 import * as Slider from "@radix-ui/react-slider";
 import clsx from "clsx";
 import { utils } from "@consolelabs/mochi-formatter";
@@ -80,7 +80,7 @@ export const StakeInput = (props: Props) => {
         <Typography level="h9" color="textSecondary">
           You’re staking
         </Typography>
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           <label className="text-[13px] text-text-tertiary">Auto-Staking</label>
           <Tooltip
             content="Auto-Staking automates the process of topping up your margin wallet, saving you from manually transferring funds before each trade. This is especially useful if you plan on making frequent trades."
@@ -89,7 +89,7 @@ export const StakeInput = (props: Props) => {
           >
             <Switch />
           </Tooltip>
-        </div>
+        </div> */}
       </div>
       <div className="rounded-lg bg-background-surface p-3 space-y-4">
         <div className="flex items-center">
