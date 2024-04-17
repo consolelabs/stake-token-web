@@ -14,7 +14,7 @@ import { FlexibleStakeContent } from "./flexible-stake-content";
 import { FlexibleStakeResponse } from "./flexible-stake-response";
 import { ChainProvider, useLoginWidget } from "@mochi-web3/login-widget";
 import { useFlexibleStaking } from "@/store/flexible-staking";
-import { retry } from "@/utils/retry";
+import { FlexibleStakePreview } from "./flexible-stake-preview";
 
 interface Props {
   open: boolean;
@@ -24,24 +24,24 @@ interface Props {
 export const FlexibleStakeModal = (props: Props) => {
   const { open, onOpenChange } = props;
   const { wallets, getProviderByAddress } = useLoginWidget();
-  const {
-    poolContract,
-    stakingTokenContract,
-    allowance,
-    stakedAmount,
-    stakingToken,
-    initializeContract,
-    updateValues,
-    setValues,
-  } = useFlexibleStaking();
+  const { stakingToken, initializeContract, updateValues } =
+    useFlexibleStaking();
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
-  const [state, setState] = useState<"init" | "approved" | "success">("init");
-  const [loading, setLoading] = useState<
-    "Initializing" | "Approving" | "Staking" | null
-  >(null);
+  const [state, setState] = useState<"init" | "preview" | "success">("init");
+  const [initializing, setInitializing] = useState(false);
+  const [amount, setAmount] = useState(0);
 
   const connected = wallets.find((w) => w.connectionStatus === "connected");
   const address = connected?.address || "";
+
+  const onConfirm = (amount: number) => {
+    setAmount(amount);
+    setState("preview");
+  };
+
+  const onSuccess = () => {
+    setState("success");
+  };
 
   useEffect(() => {
     if (!address) return;
@@ -51,7 +51,7 @@ export const FlexibleStakeModal = (props: Props) => {
         if (!provider) {
           throw new Error("No provider connected.");
         }
-        setLoading("Initializing");
+        setInitializing(true);
         initializeContract(address, provider);
         await updateValues();
       } catch (err: any) {
@@ -64,87 +64,11 @@ export const FlexibleStakeModal = (props: Props) => {
               : "Failed to initialize contract interaction",
         });
       } finally {
-        setLoading(null);
+        setInitializing(false);
       }
     };
     init();
   }, [address, getProviderByAddress, initializeContract, updateValues]);
-
-  const onStake = async (amount: number) => {
-    if (!poolContract) return;
-    try {
-      setLoading("Staking");
-      const txHash = await poolContract.stake(amount);
-      if (!txHash) {
-        throw new Error("Failed to stake");
-      }
-      setValues({ latestStaking: { txHash, amount } });
-      // FIXME: retry to get updated values
-      await retry(
-        async () => {
-          const newStakedAmount = await poolContract.getSenderStakedAmount();
-          if (!newStakedAmount || newStakedAmount.eq(stakedAmount)) {
-            throw new Error("Failed to stake");
-          }
-          return newStakedAmount;
-        },
-        3000,
-        100
-      );
-      await updateValues();
-      setState("success");
-    } catch (err: any) {
-      toast({
-        scheme: "danger",
-        title: "Error",
-        description:
-          typeof err.message === "string" ? err.message : "Failed to stake",
-      });
-    } finally {
-      setLoading(null);
-    }
-  };
-
-  const onApprove = async (amount: number) => {
-    if (!stakingTokenContract || !poolContract) return;
-    try {
-      setLoading("Approving");
-      const txHash = await stakingTokenContract.approveTokenAmount(
-        poolContract.getAddress(),
-        amount
-      );
-      if (!txHash) {
-        throw new Error("Failed to approve allowance");
-      }
-      // FIXME: retry to get updated values
-      await retry(
-        async () => {
-          const newAllowance = await stakingTokenContract.getAllowance(
-            poolContract.getAddress()
-          );
-          if (!newAllowance || newAllowance.eq(allowance)) {
-            throw new Error("Failed to approve allowance");
-          }
-          return newAllowance;
-        },
-        3000,
-        100
-      );
-      await updateValues();
-      setState("approved");
-    } catch (err: any) {
-      toast({
-        scheme: "danger",
-        title: "Error",
-        description:
-          typeof err.message === "string"
-            ? err.message
-            : "Failed to approve allowance",
-      });
-    } finally {
-      setLoading(null);
-    }
-  };
 
   return (
     <Modal
@@ -166,7 +90,7 @@ export const FlexibleStakeModal = (props: Props) => {
             }
           }}
         >
-          {(state === "init" || state === "approved") && (
+          {state === "init" && (
             <ModalTitle className="relative pb-3">
               <Typography level="h6" fontWeight="lg" className="text-center">
                 Stake {stakingToken?.token_symbol}
@@ -176,10 +100,21 @@ export const FlexibleStakeModal = (props: Props) => {
               </ModalClose>
             </ModalTitle>
           )}
-          {(state === "init" || state === "approved") && (
-            <FlexibleStakeContent
-              {...{ onApprove, onStake, loading, container }}
-            />
+          {state === "preview" && (
+            <ModalTitle className="relative pb-3">
+              <Typography level="h6" fontWeight="lg">
+                Preview Stake
+              </Typography>
+              <ModalClose className="absolute inset-y-0 right-0 h-fit">
+                <CloseLgLine className="w-7 h-7" />
+              </ModalClose>
+            </ModalTitle>
+          )}
+          {state === "init" && (
+            <FlexibleStakeContent {...{ container, initializing, onConfirm }} />
+          )}
+          {state === "preview" && (
+            <FlexibleStakePreview {...{ amount, onSuccess }} />
           )}
           {state === "success" && (
             <FlexibleStakeResponse

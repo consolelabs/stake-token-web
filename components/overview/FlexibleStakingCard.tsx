@@ -1,8 +1,6 @@
 import {
   Badge,
   Button,
-  Switch,
-  Tooltip,
   Typography,
   ValueChange,
   ValueChangeIndicator,
@@ -20,7 +18,6 @@ import { Countdown } from "./Countdown";
 import { retry } from "@/utils/retry";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { TokenImage } from "../token-image";
-import { useLoginWidget } from "@mochi-web3/login-widget";
 
 interface Props {
   hidden: boolean;
@@ -45,7 +42,6 @@ export const FlexibleStakingCard = (props: Props) => {
     updateValues,
     initializeValues,
   } = useFlexibleStaking();
-  const { wallets } = useLoginWidget();
   const { isOpen: isBoosting, onOpen: onBoost } = useDisclosure();
   const {
     isOpen: isOpenFlexibleStakeModal,
@@ -149,19 +145,21 @@ export const FlexibleStakingCard = (props: Props) => {
             Flexible
           </Badge>,
         ]}
-        headerExtra={[
-          <Tooltip
-            key="auto-staking"
-            content="Auto-Staking automates the process of topping up your margin wallet, saving you from manually transferring funds before each trade. This is especially useful if you plan on making frequent trades."
-            className="max-w-xs text-center z-50"
-            arrow="bottom-center"
-          >
-            <Switch
-              checked={autoStaking}
-              onCheckedChange={(autoStaking) => setValues({ autoStaking })}
-            />
-          </Tooltip>,
-        ]}
+        headerExtra={
+          [
+            // <Tooltip
+            //   key="auto-staking"
+            //   content="Auto-Staking automates the process of topping up your margin wallet, saving you from manually transferring funds before each trade. This is especially useful if you plan on making frequent trades."
+            //   className="max-w-xs text-center z-50"
+            //   arrow="bottom-center"
+            // >
+            //   <Switch
+            //     checked={autoStaking}
+            //     onCheckedChange={(autoStaking) => setValues({ autoStaking })}
+            //   />
+            // </Tooltip>,
+          ]
+        }
         icon={<TokenImage symbol={stakingToken?.token_symbol} size={24} />}
         title={stakingToken?.token_symbol}
         description={stakingPool?.description}
