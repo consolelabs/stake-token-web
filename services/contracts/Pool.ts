@@ -255,7 +255,7 @@ export class StakingPool {
     const rewardRate = await this.getCurrentRewardRate();
     const rewardDuration = await this.getRewardDuration();
     if (rewardRate && rewardDuration) {
-      const estimateAPR = rewardRate.mul(rewardDuration).mul(daysInYear * 100);
+      const estimateAPR = rewardRate.mul(rewardDuration).mul(daysInYear / 7 * 100);
       return estimateAPR;
     }
     return constants.Zero;
