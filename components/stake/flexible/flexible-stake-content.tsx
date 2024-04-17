@@ -11,22 +11,20 @@ import { useMemo, useState } from "react";
 import { TokenAmount } from "@/utils/number";
 import { StakeInput } from "../stake-input";
 import { useFlexibleStaking } from "@/store/flexible-staking";
-import { Spinner } from "@mochi-ui/icons";
 import { LoginWidget } from "@mochi-web3/login-widget";
 import { utils } from "@consolelabs/mochi-formatter";
 import { formatUnits } from "ethers/lib/utils";
 import { useWalletNetwork } from "@/hooks/useWalletNetwork";
 
 interface Props {
-  onStake: (amount: number) => Promise<void>;
-  onApprove: (amount: number) => Promise<void>;
-  loading: string | null;
   container: HTMLDivElement | null;
+  initializing: boolean;
+  onConfirm: (amount: number) => void;
 }
 
 export const FlexibleStakeContent = (props: Props) => {
-  const { onStake, onApprove, loading, container } = props;
-  const { balance, allowance, apr, stakingToken } = useFlexibleStaking();
+  const { container, initializing, onConfirm } = props;
+  const { balance, apr, stakingToken } = useFlexibleStaking();
   const chain = useMemo(() => stakingToken?.token_chain_id, [stakingToken]);
   const [amount, setAmount] = useState<TokenAmount>({
     value: 0,
@@ -38,9 +36,6 @@ export const FlexibleStakeContent = (props: Props) => {
 
   const convertedBalance = Number(
     formatUnits(balance, stakingToken?.token_decimal)
-  );
-  const convertedAllowance = Number(
-    formatUnits(allowance, stakingToken?.token_decimal)
   );
 
   return (
@@ -72,22 +67,16 @@ export const FlexibleStakeContent = (props: Props) => {
         <Button
           size="lg"
           disabled={
-            amount.value <= 0 || amount.value > convertedBalance || !!loading
+            amount.value <= 0 || amount.value > convertedBalance || initializing
           }
           className="mt-3"
-          onClick={
-            convertedAllowance >= amount.value
-              ? () => onStake(amount.value)
-              : () => onApprove(amount.value)
-          }
+          onClick={() => onConfirm(amount.value)}
         >
-          {!!loading && <Spinner className="w-4 h-4" />}
-          {loading ||
-            (amount.value > convertedBalance
-              ? "Insufficient balance"
-              : convertedAllowance >= amount.value
-              ? "Stake"
-              : "Approve Spending Cap")}
+          {initializing
+            ? "Initializing"
+            : amount.value > convertedBalance
+            ? "Insufficient balance"
+            : "Stake"}
         </Button>
       ) : isConnected && !isCorrectNetwork ? (
         <Button size="lg" className="mt-3" onClick={changeNetwork}>

@@ -47,7 +47,6 @@ export class ERC20TokenInteraction {
         method: "balanceOf", 
         args: [this.sender],
         to: this.address,
-        from: this.sender,
       });
 
       if (response?.length && BigNumber.isBigNumber(response[0])) {
@@ -67,7 +66,6 @@ export class ERC20TokenInteraction {
         method: "allowance", 
         args: [this.sender, spenderAddress],
         to: this.address,
-        from: this.sender,
       });
 
       if (response?.length && BigNumber.isBigNumber(response[0])) {
