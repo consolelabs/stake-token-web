@@ -17,8 +17,7 @@ interface Props {
 export const FlexibleStakeResponse = (props: Props) => {
   const { onClose } = props;
   const {
-    startTime,
-    finishTime,
+    rewardClaimableDate,
     autoStaking,
     latestStaking,
     stakingToken,
@@ -69,7 +68,7 @@ export const FlexibleStakeResponse = (props: Props) => {
               <Typography level="h9">Value date</Typography>
             </div>
             <Typography level="p5">
-              {formatUnixTimestampToDateTime(startTime)}
+            {formatUnixTimestampToDateTime(stakeDate)}
             </Typography>
           </div>
           <div className="flex items-center justify-between relative">
@@ -81,7 +80,7 @@ export const FlexibleStakeResponse = (props: Props) => {
               <Typography level="h9">Interest distribution date</Typography>
             </div>
             <Typography level="p5">
-              {formatUnixTimestampToDateTime(finishTime)}
+            {formatUnixTimestampToDateTime(rewardClaimableDate)}
             </Typography>
           </div>
         </div>
