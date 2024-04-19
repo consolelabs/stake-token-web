@@ -12,6 +12,8 @@ const getPoolKey = (
   return `${type}-${stakingTokenSymbol}-${rewardTokenSymbol}`;
 };
 
+export const YEAR_IN_SECONDS = 31556926;
+
 export class StakingPool {
   private static instances: Map<string, StakingPool> = new Map();
   private provider: ChainProvider;
@@ -79,40 +81,19 @@ export class StakingPool {
     return this.address;
   }
 
-  async getPeriodFinishDate(): Promise<number> {
+
+  async getRewardClaimableDate(): Promise<number> {
     try {
       const response: BigNumber[] = await this.provider.read({
         abi: this.abi,
-        method: "periodFinish",
-        args: [],
+        method: "lastDepositOrWithdrawTimestamp",
+        args: [this.sender],
         to: this.address,
       });
 
       if (response?.length && BigNumber.isBigNumber(response[0])) {
-        console.log("getPeriodFinishDate", response[0].toNumber());
-        return response[0].toNumber();
-      }
-
-      console.error("cannot get periodFinish");
-      return 0;
-    } catch (error) {
-      console.error(error);
-      return 0;
-    }
-  }
-
-  async getPeriodStartDate(): Promise<number> {
-    try {
-      const response: BigNumber[] = await this.provider.read({
-        abi: this.abi,
-        method: "lastUpdateTime",
-        args: [],
-        to: this.address,
-      });
-
-      if (response?.length && BigNumber.isBigNumber(response[0])) {
-        console.log("getLastRewardUpdateDate", response[0].toBigInt());
-        return response[0].toNumber();
+        console.log("lastDepositOrWithdrawTimestamp", response[0].toBigInt());
+        return response[0].add(43200).toNumber();
       }
 
       console.error("cannot get lastUpdateTime");
@@ -120,46 +101,6 @@ export class StakingPool {
     } catch (error) {
       console.error(error);
       return 0;
-    }
-  }
-
-  async getRewardDuration(): Promise<number> {
-    try {
-      const response: BigNumber[] = await this.provider.read({
-        abi: this.abi,
-        method: "rewardsDuration",
-        args: [],
-        to: this.address,
-      });
-
-      if (response?.length && BigNumber.isBigNumber(response[0])) {
-        console.log("getRewardDuration", response[0].toNumber());
-        return response[0].toNumber();
-      }
-
-      console.error("cannot get getRewardDuration");
-      return 0;
-    } catch (error) {
-      console.error(error);
-      return 0;
-    }
-  }
-
-  async getRewardPerTokenStaked(): Promise<BigNumber | undefined> {
-    try {
-      const response: BigNumber[] = await this.provider.read({
-        abi: this.abi,
-        method: "rewardPerToken",
-        args: [],
-        to: this.address,
-      });
-
-      console.log("getRewardPerTokenStaked:", response);
-      if (response?.length && BigNumber.isBigNumber(response[0])) {
-        return response[0];
-      }
-    } catch (error) {
-      console.error(error);
     }
   }
 
@@ -251,11 +192,9 @@ export class StakingPool {
 
   // assume you staked 1 token
   async calculateRealtimeAPR(): Promise<BigNumber> {
-    const daysInYear = 365;
     const rewardRate = await this.getCurrentRewardRate();
-    const rewardDuration = await this.getRewardDuration();
-    if (rewardRate && rewardDuration) {
-      const estimateAPR = rewardRate.mul(rewardDuration).mul(daysInYear / 7 * 100);
+    if (rewardRate) {
+      const estimateAPR = rewardRate.mul(YEAR_IN_SECONDS * 100);
       return estimateAPR;
     }
     return constants.Zero;
@@ -283,6 +222,24 @@ export class StakingPool {
 
   async unstake(): Promise<string | undefined> {
     try {
+      const stakedAmount = await this.getSenderStakedAmount();
+      if (!stakedAmount) return;
+      const txHash = await this.provider.write({
+        abi: this.abi,
+        method: "withdraw",
+        args: [stakedAmount.toString()],
+        to: this.address,
+        from: this.sender,
+      });
+      if (txHash) return txHash;
+    } catch (error) {
+      console.error(error);
+      return;
+    }
+  }
+
+  async unstakeWithReward(): Promise<string | undefined> {
+    try {
       const txHash = await this.provider.write({
         abi: this.abi,
         method: "unstake",
@@ -301,7 +258,7 @@ export class StakingPool {
     try {
       const txHash = await this.provider.write({
         abi: this.abi,
-        method: "getReward",
+        method: "claimReward",
         args: [],
         to: this.address,
         from: this.sender,

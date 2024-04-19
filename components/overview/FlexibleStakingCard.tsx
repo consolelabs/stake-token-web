@@ -36,7 +36,7 @@ export const FlexibleStakingCard = (props: Props) => {
     stakingToken,
     rewardToken,
     autoStaking,
-    finishTime,
+    rewardClaimableDate,
     poolContract,
     setValues,
     updateValues,
@@ -331,8 +331,8 @@ export const FlexibleStakingCard = (props: Props) => {
           hidden,
         }}
         footerExtra={
-          !stakedAmount.isZero() && !unclaimedRewards.isZero() && finishTime ? (
-            <Countdown finishTime={finishTime}>
+          !unclaimedRewards.isZero() && rewardClaimableDate ? (
+            <Countdown finishTime={rewardClaimableDate}>
               <Button variant="outline" disabled={isClaiming} onClick={onClaim}>
                 {isClaiming && <Spinner className="w-4 h-4" />}
                 {isClaiming ? "Claiming" : "Claim"}
