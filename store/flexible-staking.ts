@@ -1,4 +1,4 @@
-import { ERC20TokenInteraction, StakingPool } from "@/services";
+import { ERC20TokenInteraction, StakingPool, YEAR_IN_SECONDS } from "@/services";
 import { ChainProvider } from "@mochi-web3/login-widget";
 import { create } from "zustand";
 import { Pool, Token, useTokenStaking } from "./token-staking";
@@ -24,8 +24,7 @@ interface State {
   > | null;
   stakingToken: Token | null;
   rewardToken: Token | null;
-  startTime: number; // in seconds
-  finishTime: number; // in seconds
+  rewardClaimableDate: number; // in seconds
   autoStaking: boolean;
   latestStaking: {
     txHash: string;
@@ -57,8 +56,7 @@ const initialState: State = {
   stakingPool: null,
   stakingToken: null,
   rewardToken: null,
-  startTime: 0,
-  finishTime: 0,
+  rewardClaimableDate: 0,
   autoStaking: true,
   latestStaking: null,
 };
@@ -100,22 +98,17 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
 
       const results = await Promise.allSettled([
         contract.rewardRate(),
-        contract.rewardsDuration(),
         contract.totalSupply(),
       ]);
-      const [rewardRateRes, rewardDurationRes, totalSupplyRes] = results.map(
+      const [rewardRateRes, totalSupplyRes] = results.map(
         (r) => (r.status === "fulfilled" ? r.value : null)
       );
 
       // get apr
-      const daysInYear = 365;
       const rewardRate = BigNumber.isBigNumber(rewardRateRes)
         ? rewardRateRes
         : constants.Zero;
-      const rewardDuration = BigNumber.isBigNumber(rewardDurationRes)
-        ? rewardDurationRes
-        : constants.Zero;
-      const apr = rewardRate.mul(rewardDuration).mul((daysInYear / 7) * 100);
+      const apr = rewardRate.mul(YEAR_IN_SECONDS * 100);
 
       //get pool staked amount
       const poolStakedAmount = BigNumber.isBigNumber(totalSupplyRes)
@@ -160,8 +153,7 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
       getPoolStakedAmount,
       getUnclaimedRewards,
       getClaimedRewards,
-      getStartDate,
-      getFinishDate,
+      getLastInteractionDate,
     ] = await Promise.allSettled([
       stakingTokenContract.getTokenBalance(),
       stakingTokenContract.getAllowance(
@@ -172,8 +164,7 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
       poolContract.getPoolTotalStakedAmount(),
       poolContract.getRewardAvailableForClaim(),
       poolContract.getClaimedRewardsForAddress(),
-      poolContract.getPeriodStartDate(),
-      poolContract.getPeriodFinishDate(),
+      poolContract.getRewardClaimableDate(),
     ]);
     const [
       balance,
@@ -194,7 +185,7 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
     ].map((r) =>
       r.status === "fulfilled" ? r.value || constants.Zero : constants.Zero
     );
-    const [startTime, finishTime] = [getStartDate, getFinishDate].map((r) =>
+    const [rewardClaimableDate] = [getLastInteractionDate].map((r) =>
       r.status === "fulfilled" ? r.value || 0 : 0
     );
     get().setValues({
@@ -205,8 +196,7 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
       poolStakedAmount,
       unclaimedRewards,
       totalEarnedRewards,
-      startTime,
-      finishTime,
+      rewardClaimableDate,
     });
   },
 }));
