@@ -1,172 +1,104 @@
 "use client";
 
 import { Footer } from "@/components/footer";
-import { Button, IconButton, Typography } from "@mochi-ui/core";
-import { EyeHiddenSolid, EyeShowSolid } from "@mochi-ui/icons";
-import { useLoginWidget } from "@mochi-web3/login-widget";
-import { Suspense, useEffect, useState } from "react";
-import { FlexibleStakingCard } from "@/components/overview/FlexibleStakingCard";
-import { FixedStakingCard } from "@/components/overview/FixedStakingCard";
-import { NFTCard } from "@/components/overview/NFTCard";
-import { useFlexibleStaking } from "@/store/flexible-staking";
-import { utils } from "@consolelabs/mochi-formatter";
-import { useTokenStaking } from "@/store/token-staking";
-import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { Header } from "@/components/header/header";
-import { TokenImage } from "@/components/token-image";
+import { Suspense, useEffect } from "react";
+import { useServerInfo } from "@/store/server-info";
+import Image from "next/image";
+import { Button, Typography } from "@mochi-ui/core";
+import { PlusLine, VaultSolid } from "@mochi-ui/icons";
+import { Highlights } from "@/components/overview/highlights";
 
 const Overview = () => {
-  const { isLoggedIn } = useLoginWidget();
-  const { stakingPools } = useTokenStaking();
-  const {
-    balance,
-    stakedAmount,
-    totalEarnedRewards,
-    stakingToken,
-    rewardToken,
-  } = useFlexibleStaking();
-  const [showInfo, setShowInfo] = useState(false);
+  const { abort, getInfo } = useServerInfo();
 
   useEffect(() => {
-    if (!!balance && !showInfo) {
-      setShowInfo(true);
-    }
-  }, [balance, showInfo]);
+    getInfo();
+    return abort;
+  }, [abort, getInfo]);
 
   return (
-    <div className="overflow-y-auto h-[calc(100vh-56px)] flex flex-col">
-      <div className="max-w-6xl pt-12 pb-16 px-4 mx-auto space-y-14 flex-1">
-        <div className="flex gap-8 flex-col lg:flex-row items-center lg:items-start">
-          {!isLoggedIn ? (
-            <Typography level="h3" fontWeight="lg" className="flex-1 pb-3">
-              Log in to see your available assets to stake
+    <div
+      className="overflow-y-auto h-[calc(100vh-56px)] flex flex-col"
+      style={{ background: "#f4f5f6" }}
+    >
+      <div className="flex relative flex-col px-40 pt-14 pb-36 bg-black">
+        <img
+          src="/tree.png"
+          alt=""
+          className="absolute top-1/2 left-3/4 h-full -translate-y-1/2 scale-[0.9]"
+        />
+        <div className="absolute top-0 left-0 w-full h-full bg-black/30" />
+        <div className="flex relative flex-col gap-y-2.5 w-[650px]">
+          <div className="flex gap-x-2 items-center">
+            <Image width={32} height={32} src="/verified-badge.png" alt="" />
+            <Typography level="h4" className="font-semibold text-white">
+              Dwarves Guild
             </Typography>
-          ) : balance.isZero() ? (
-            <Typography level="h3" fontWeight="lg" className="flex-1 pb-3">
-              You don&apos;t have available assets to stake in your wallet.
-            </Typography>
-          ) : (
-            <Typography level="h3" fontWeight="lg" className="flex-1">
-              You have{" "}
-              <span className="text-primary-solid">
-                {showInfo
-                  ? utils.formatTokenDigit(
-                      formatUnits(balance, stakingToken?.token_decimal)
-                    )
-                  : "*****"}
-              </span>{" "}
-              {stakingToken?.token_symbol} across{" "}
-              <span className="text-secondary-solid">1</span> networks available
-              to stake.
-            </Typography>
-          )}
-          {isLoggedIn && (
-            <div className="rounded-2xl border border-divider bg-background-level1 p-4 w-96 max-w-full">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-1">
-                  <Typography level="h6" fontWeight="lg">
-                    My Earn
-                  </Typography>
-                  <IconButton
-                    label="Show info"
-                    variant="link"
-                    onClick={() => setShowInfo(!showInfo)}
-                  >
-                    {showInfo ? (
-                      <EyeShowSolid className="w-5 h-5 text-text-disabled" />
-                    ) : (
-                      <EyeHiddenSolid className="w-5 h-5 text-text-disabled" />
-                    )}
-                  </IconButton>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <Button variant="link" className="h-fit pr-0 pl-0">
-                    Claim all
-                  </Button>
-                  <Button variant="link" className="h-fit pr-0 pl-0">
-                    Restake
-                  </Button>
-                </div>
-              </div>
-              <div className="flex items-center justify-between py-3 border-b border-divider">
-                <div className="space-y-0.5">
-                  <Typography level="p6" className="text-text-tertiary">
-                    Total amount staked
-                  </Typography>
-                  <Typography level="h6" fontWeight="lg">
-                    {showInfo
-                      ? utils.formatUsdDigit(
-                          formatUnits(
-                            stakedAmount
-                              .mul(
-                                parseUnits(
-                                  String(stakingToken?.token_price || 1)
-                                )
-                              )
-                              .div(parseUnits("1")),
-                            stakingToken?.token_decimal
-                          )
-                        )
-                      : "*********"}
-                  </Typography>
-                </div>
-                <div className="flex items-center space-x-1 ml-2">
-                  {stakingPools.map((each) => (
-                    <TokenImage
-                      key={each.guild_id}
-                      symbol={each.staking_token.token_symbol}
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-6 items-center py-3">
-                <div className="space-y-0.5">
-                  <Typography level="p6" className="text-text-tertiary">
-                    Rewards earned
-                  </Typography>
-                  <Typography level="h6" fontWeight="lg" color="success">
-                    {showInfo
-                      ? utils.formatUsdDigit(
-                          formatUnits(
-                            totalEarnedRewards
-                              .mul(
-                                parseUnits(
-                                  String(rewardToken?.token_price || 1)
-                                )
-                              )
-                              .div(parseUnits("1")),
-                            rewardToken?.token_decimal
-                          )
-                        )
-                      : "********"}
-                  </Typography>
-                </div>
-                <div className="space-y-0.5">
-                  <Typography level="p6" className="text-text-tertiary">
-                    NFT staking
-                  </Typography>
-                  <Typography level="h6" fontWeight="lg">
-                    {showInfo ? "0" : "********"}
-                  </Typography>
-                </div>
-              </div>
+          </div>
+          <Typography level="p" className="text-white">
+            A software development firm based in Asia. Helping tech startups,
+            entrepreneurs build and scale world-class products since 2013.
+          </Typography>
+          <div className="flex gap-x-2 items-center -ml-1.5">
+            <div className="flex gap-x-1.5 items-center py-0.5 px-1.5">
+              <div className="w-2 h-2 rounded-full bg-success-solid" />
+              <Typography level="p6" className="font-semibold text-white">
+                97,118 Online
+              </Typography>
             </div>
-          )}
-        </div>
-        <div className="flex flex-wrap justify-center gap-6">
-          {stakingPools.some((each) => each.type === "flexible") && (
-            <FlexibleStakingCard hidden={isLoggedIn && !showInfo} />
-          )}
-          {stakingPools.some((each) => each.type === "fixed") && (
-            <FixedStakingCard hidden={isLoggedIn && !showInfo} />
-          )}
-          {stakingPools.some((each) => each.type === "nft") && (
-            <NFTCard hidden={isLoggedIn && !showInfo} />
-          )}
-          <NFTCard hidden={isLoggedIn && !showInfo} />
+
+            <div className="flex gap-x-1.5 items-center py-0.5 px-1.5">
+              <div className="w-2 h-2 rounded-full bg-neutral-outline-border" />
+              <Typography level="p6" className="font-semibold text-white">
+                2,301,743 Members
+              </Typography>
+            </div>
+
+            <Typography
+              level="p6"
+              color="textDisabled"
+              className="font-semibold"
+            >
+              Joined 2021 Dec
+            </Typography>
+          </div>
         </div>
       </div>
-      <Footer />
+      <div className="flex relative flex-col px-40">
+        <div className="flex justify-between items-end -mt-[66px]">
+          <div className="overflow-hidden p-1 bg-[#f4f5f6] rounded-full">
+            <Image
+              width={132}
+              height={132}
+              src="/dwarves-guild-logo.png"
+              alt=""
+            />
+          </div>
+          <div className="flex gap-x-2 mb-4">
+            <Button variant="link" color="neutral">
+              Share
+            </Button>
+            <Button variant="outline" color="neutral">
+              <VaultSolid />
+              Stake
+            </Button>
+            <Button>
+              <PlusLine />
+              Join Server
+            </Button>
+          </div>
+        </div>
+        <div className="flex flex-col pt-6 pb-10">
+          <Highlights />
+        </div>
+        {/* <About /> */}
+        {/* <InfoGrid /> */}
+        {/* <BountyTable /> */}
+      </div>
+      <div className="mt-auto">
+        <Footer />
+      </div>
     </div>
   );
 };
