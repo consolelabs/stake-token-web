@@ -8,6 +8,8 @@ import Image from "next/image";
 import { Button, Typography } from "@mochi-ui/core";
 import { PlusLine, VaultSolid } from "@mochi-ui/icons";
 import { Highlights } from "@/components/overview/highlights";
+import { About } from "@/components/overview/about";
+import { BountyTable } from "@/components/overview/bounty-table";
 
 const Overview = () => {
   const { abort, getInfo } = useServerInfo();
@@ -65,7 +67,7 @@ const Overview = () => {
           </div>
         </div>
       </div>
-      <div className="flex relative flex-col px-40">
+      <div className="flex relative flex-col px-40 pb-16">
         <div className="flex justify-between items-end -mt-[66px]">
           <div className="overflow-hidden p-1 bg-[#f4f5f6] rounded-full">
             <Image
@@ -89,12 +91,11 @@ const Overview = () => {
             </Button>
           </div>
         </div>
-        <div className="flex flex-col pt-6 pb-10">
+        <div className="flex flex-col py-6">
           <Highlights />
         </div>
-        {/* <About /> */}
-        {/* <InfoGrid /> */}
-        {/* <BountyTable /> */}
+        <About />
+        <BountyTable />
       </div>
       <div className="mt-auto">
         <Footer />
