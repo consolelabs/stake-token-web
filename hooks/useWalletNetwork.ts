@@ -1,7 +1,6 @@
-import { tryCatch } from "@/utils/tryCatch";
+import { useConnectedWallet } from "@/store/connected-wallet";
 import { toast } from "@mochi-ui/core";
-import { ChainProvider, useLoginWidget } from "@mochi-web3/login-widget";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface Props {
   chain?: { id?: number; name?: string; rpc?: string; currency?: string };
@@ -9,17 +8,10 @@ interface Props {
 
 export const useWalletNetwork = (props: Props) => {
   const { chain } = props;
-  const { wallets, getProviderByAddress } = useLoginWidget();
+  const { address, provider: chainProvider } = useConnectedWallet();
   const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
 
-  const connectedAddress = useMemo(
-    () => wallets?.find((w) => w.connectionStatus === "connected")?.address,
-    [wallets]
-  );
-  const { provider, chainId } = tryCatch<Partial<ChainProvider>>(
-    () => getProviderByAddress(connectedAddress || "") || {},
-    () => ({})
-  );
+  const { provider, chainId } = chainProvider || {};
 
   const changeNetwork = useCallback(async () => {
     if (!provider) return;
@@ -93,7 +85,7 @@ export const useWalletNetwork = (props: Props) => {
   }, [chain?.id, chainId]);
 
   return {
-    isConnected: !!connectedAddress,
+    isConnected: !!address,
     isCorrectNetwork,
     changeNetwork,
     checkNetwork,

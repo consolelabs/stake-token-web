@@ -12,7 +12,6 @@ import { useFlexibleStaking } from "@/store/flexible-staking";
 import { utils } from "@consolelabs/mochi-formatter";
 import { useTokenStaking } from "@/store/token-staking";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
-import clsx from "clsx";
 import { TokenImage } from "@/components/token-image";
 import { Header } from "@/components/header/header";
 
@@ -154,12 +153,7 @@ const Overview = () => {
             </div>
           )}
         </div>
-        <div
-          className={clsx("grid grid-cols-1 mx-auto gap-4", {
-            "md:grid-cols-2": stakingPools.length >= 2,
-            "lg:grid-cols-3": stakingPools.length >= 3,
-          })}
-        >
+        <div className="flex flex-wrap justify-center gap-6">
           {stakingPools.some((each) => each.type === "flexible") && (
             <FlexibleStakingCard hidden={isLoggedIn && !showInfo} />
           )}
@@ -169,6 +163,7 @@ const Overview = () => {
           {stakingPools.some((each) => each.type === "nft") && (
             <NFTCard hidden={isLoggedIn && !showInfo} />
           )}
+          <NFTCard hidden={isLoggedIn && !showInfo} />
         </div>
       </div>
       <Footer />

@@ -1,4 +1,8 @@
-import { ERC20TokenInteraction, StakingPool, YEAR_IN_SECONDS } from "@/services";
+import {
+  ERC20TokenInteraction,
+  StakingPool,
+  YEAR_IN_SECONDS,
+} from "@/services";
 import { ChainProvider } from "@mochi-web3/login-widget";
 import { create } from "zustand";
 import { Pool, Token, useTokenStaking } from "./token-staking";
@@ -6,8 +10,6 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber, Contract, constants } from "ethers";
 
 interface State {
-  address: string;
-  provider: ChainProvider | null;
   poolContract: StakingPool | null;
   stakingTokenContract: ERC20TokenInteraction | null;
   apr: BigNumber;
@@ -41,8 +43,6 @@ interface Action {
 }
 
 const initialState: State = {
-  address: "",
-  provider: null,
   poolContract: null,
   stakingTokenContract: null,
   apr: constants.Zero,
@@ -100,8 +100,8 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
         contract.rewardRate(),
         contract.totalSupply(),
       ]);
-      const [rewardRateRes, totalSupplyRes] = results.map(
-        (r) => (r.status === "fulfilled" ? r.value : null)
+      const [rewardRateRes, totalSupplyRes] = results.map((r) =>
+        r.status === "fulfilled" ? r.value : null
       );
 
       // get apr
@@ -139,7 +139,7 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
     if (!poolContract || !stakingTokenContract) return;
     poolContract.setSenderAddress(address);
     stakingTokenContract.setSenderAddress(address);
-    get().setValues({ address, provider, poolContract, stakingTokenContract });
+    get().setValues({ poolContract, stakingTokenContract });
   },
   updateValues: async () => {
     const { stakingTokenContract, poolContract, stakingPool } = get();
