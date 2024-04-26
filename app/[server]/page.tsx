@@ -12,8 +12,8 @@ import { useFlexibleStaking } from "@/store/flexible-staking";
 import { utils } from "@consolelabs/mochi-formatter";
 import { useTokenStaking } from "@/store/token-staking";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
-import { TokenImage } from "@/components/token-image";
 import { Header } from "@/components/header/header";
+import { TokenImage } from "@/components/token-image";
 
 const Overview = () => {
   const { isLoggedIn } = useLoginWidget();
