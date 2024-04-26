@@ -24,14 +24,14 @@ const Overview = () => {
       className="overflow-y-auto h-[calc(100vh-56px)] flex flex-col"
       style={{ background: "#f4f5f6" }}
     >
-      <div className="flex relative flex-col px-40 pt-14 pb-36 bg-black">
+      <div className="flex relative flex-col pt-14 pb-36 bg-black">
         <img
           src="/tree.png"
           alt=""
           className="absolute top-1/2 left-3/4 h-full -translate-y-1/2 scale-[0.9]"
         />
         <div className="absolute top-0 left-0 w-full h-full bg-black/30" />
-        <div className="flex relative flex-col gap-y-2.5 w-[650px]">
+        <div className="flex relative flex-col gap-y-2.5 px-14 mx-auto w-full max-w-6xl">
           <div className="flex gap-x-2 items-center">
             <Image width={32} height={32} src="/verified-badge.png" alt="" />
             <Typography level="h4" className="font-semibold text-white">
@@ -67,7 +67,7 @@ const Overview = () => {
           </div>
         </div>
       </div>
-      <div className="flex relative flex-col px-40 pb-16">
+      <div className="flex relative flex-col px-14 pb-16 mx-auto max-w-6xl">
         <div className="flex justify-between items-end -mt-[66px]">
           <div className="overflow-hidden p-1 bg-[#f4f5f6] rounded-full">
             <Image
