@@ -13,7 +13,14 @@ export class ERC20TokenInteraction {
   private decimals: number;
   private sender: string;
 
-  private constructor(_name: string, _symbol: string, _abi: string, _address: string, _decimals: number, _provider: ChainProvider) {
+  private constructor(
+    _name: string,
+    _symbol: string,
+    _abi: string,
+    _address: string,
+    _decimals: number,
+    _provider: ChainProvider
+  ) {
     this.name = _name;
     this.symbol = _symbol;
     this.provider = _provider;
@@ -23,11 +30,37 @@ export class ERC20TokenInteraction {
     this.sender = ""; // current connected wallet address
   }
 
-  public static getInstance(token: Token, _provider: ChainProvider): ERC20TokenInteraction | undefined {
-    const { token_address, token_decimal, token_name, token_symbol, token_abi } = token;
-    if (!token_address || !token_decimal || !token_name || !token_symbol || !token_abi) return;
+  public static getInstance(
+    token: Token,
+    _provider: ChainProvider
+  ): ERC20TokenInteraction | undefined {
+    const {
+      token_address,
+      token_decimal,
+      token_name,
+      token_symbol,
+      token_abi,
+    } = token;
+    if (
+      !token_address ||
+      !token_decimal ||
+      !token_name ||
+      !token_symbol ||
+      !token_abi
+    )
+      return;
     if (!ERC20TokenInteraction.instances.has(token_symbol)) {
-      ERC20TokenInteraction.instances.set(token_symbol, new ERC20TokenInteraction(token_name, token_symbol, token_abi, token_address, token_decimal, _provider));
+      ERC20TokenInteraction.instances.set(
+        token_symbol,
+        new ERC20TokenInteraction(
+          token_name,
+          token_symbol,
+          token_abi,
+          token_address,
+          token_decimal,
+          _provider
+        )
+      );
     }
     return ERC20TokenInteraction.instances.get(token_symbol)!;
   }
@@ -42,9 +75,9 @@ export class ERC20TokenInteraction {
 
   async getTokenBalance(): Promise<BigNumber | undefined> {
     try {
-      const response: BigNumber[] = await this.provider.read({ 
-        abi: this.abi, 
-        method: "balanceOf", 
+      const response: BigNumber[] = await this.provider.read({
+        abi: this.abi,
+        method: "balanceOf",
         args: [this.sender],
         to: this.address,
       });
@@ -61,9 +94,9 @@ export class ERC20TokenInteraction {
 
   async getAllowance(spenderAddress: string): Promise<BigNumber | undefined> {
     try {
-      const response: [BigNumber] = await this.provider.read({ 
-        abi: this.abi, 
-        method: "allowance", 
+      const response: [BigNumber] = await this.provider.read({
+        abi: this.abi,
+        method: "allowance",
         args: [this.sender, spenderAddress],
         to: this.address,
       });
@@ -81,9 +114,9 @@ export class ERC20TokenInteraction {
   async approveTokenAmount(spenderAddress: string, amount: number) {
     try {
       const amountWithDecimals = getAmountWithDecimals(amount, this.decimals);
-      const txHash = await this.provider.write({ 
-        abi: this.abi, 
-        method: "approve", 
+      const txHash = await this.provider.write({
+        abi: this.abi,
+        method: "approve",
         args: [spenderAddress, amountWithDecimals],
         to: this.address,
         from: this.sender,

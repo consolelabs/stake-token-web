@@ -15,9 +15,9 @@ import {
   AccordionContent,
 } from "@mochi-ui/core";
 import { LoginWidget, useLoginWidget } from "@mochi-web3/login-widget";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { utils } from "@consolelabs/mochi-formatter";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import { useFlexibleStaking } from "@/store/flexible-staking";
 import Image from "next/image";
@@ -34,10 +34,12 @@ import { truncateWallet } from "@/utils/string";
 import { formatUnits } from "ethers/lib/utils";
 import { getUsdAmount } from "@/utils/number";
 import { useDisclosure } from "@dwarvesf/react-hooks";
+import Link from "next/link";
 
 const DropdownContent = () => {
   const { profile, logout } = useLoginWidget();
   const { push } = useRouter();
+  const params = useParams<{ server: string }>();
   const { walletsWithBalance, mochiWallet, getConnectedWallet } =
     useWalletBalance();
   const {
@@ -141,9 +143,15 @@ const DropdownContent = () => {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-      <DropdownMenuItem leftIcon={<WalletSolid className="w-5 h-5" />}>
-        My Earn
-      </DropdownMenuItem>
+      <Link href={ROUTES.OVERVIEW_NFT(params.server)}>
+        <DropdownMenuItem
+          leftIcon={
+            <Image src="/svg/image.svg" alt="" width={20} height={20} />
+          }
+        >
+          NFT Earn
+        </DropdownMenuItem>
+      </Link>
       <DropdownMenuSeparator className="min-h-[1px]" />
       <DropdownMenuItem leftIcon={<LifeBuoySolid className="w-5 h-5" />}>
         Support
@@ -198,8 +206,10 @@ export default function ProfileDropdown({
       ) : null;
   }
 
+  const initWallets = useRef(false);
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn || initWallets.current) return;
+    initWallets.current = true;
     initializeWallets(wallets);
   }, [initializeWallets, isLoggedIn, wallets]);
 
