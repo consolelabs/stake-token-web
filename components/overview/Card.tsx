@@ -42,7 +42,7 @@ export const Card = (props: Props) => {
   return (
     <div
       className={clsx(
-        "rounded-2xl relative bg-background-surface flex flex-col w-full max-w-sm justify-self-center",
+        "rounded-2xl relative bg-background-surface flex flex-col w-full min-w-[350px] max-w-sm md:max-w-[calc((100%-3rem)/3)] justify-self-center",
         isBoosting
           ? "border-2 border-transparent bg-clip-padding before:absolute before:z-[-1] before:inset-0 before:-m-0.5 before:bg-gradient-to-br before:from-[#1570EF] before:to-[#F00C88] before:rounded-2xl"
           : "border border-neutral-outline-border p-[1px]"

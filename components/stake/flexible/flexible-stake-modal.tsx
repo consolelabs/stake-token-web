@@ -12,7 +12,6 @@ import { CloseLgLine } from "@mochi-ui/icons";
 import { useEffect, useState } from "react";
 import { FlexibleStakeContent } from "./flexible-stake-content";
 import { FlexibleStakeResponse } from "./flexible-stake-response";
-import { ChainProvider, useLoginWidget } from "@mochi-web3/login-widget";
 import { useFlexibleStaking } from "@/store/flexible-staking";
 import { FlexibleStakePreview } from "./flexible-stake-preview";
 
@@ -23,16 +22,12 @@ interface Props {
 
 export const FlexibleStakeModal = (props: Props) => {
   const { open, onOpenChange } = props;
-  const { wallets, getProviderByAddress } = useLoginWidget();
-  const { stakingToken, initializeContract, updateValues } =
+  const { poolContract, stakingTokenContract, stakingToken, updateValues } =
     useFlexibleStaking();
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [state, setState] = useState<"init" | "preview" | "success">("init");
   const [initializing, setInitializing] = useState(false);
   const [amount, setAmount] = useState(0);
-
-  const connected = wallets.find((w) => w.connectionStatus === "connected");
-  const address = connected?.address || "";
 
   const onConfirm = (amount: number) => {
     setAmount(amount);
@@ -44,15 +39,10 @@ export const FlexibleStakeModal = (props: Props) => {
   };
 
   useEffect(() => {
-    if (!address) return;
+    if (!poolContract || !stakingTokenContract) return;
     const init = async () => {
       try {
-        const provider = getProviderByAddress(address) as ChainProvider | null;
-        if (!provider) {
-          throw new Error("No provider connected.");
-        }
         setInitializing(true);
-        initializeContract(address, provider);
         await updateValues();
       } catch (err: any) {
         toast({
@@ -68,7 +58,7 @@ export const FlexibleStakeModal = (props: Props) => {
       }
     };
     init();
-  }, [address, getProviderByAddress, initializeContract, updateValues]);
+  }, [poolContract, stakingTokenContract, updateValues]);
 
   return (
     <Modal

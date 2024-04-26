@@ -68,7 +68,7 @@ export const FlexibleStakeResponse = (props: Props) => {
               <Typography level="h9">Value date</Typography>
             </div>
             <Typography level="p5">
-            {formatUnixTimestampToDateTime(stakeDate)}
+              {formatUnixTimestampToDateTime(stakeDate)}
             </Typography>
           </div>
           <div className="flex items-center justify-between relative">
@@ -80,7 +80,7 @@ export const FlexibleStakeResponse = (props: Props) => {
               <Typography level="h9">Interest distribution date</Typography>
             </div>
             <Typography level="p5">
-            {formatUnixTimestampToDateTime(rewardClaimableDate)}
+              {formatUnixTimestampToDateTime(rewardClaimableDate)}
             </Typography>
           </div>
         </div>

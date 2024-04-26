@@ -6,7 +6,10 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "cdn.discordapp.com",
-        port: "",
+      },
+      {
+        protocol: "https",
+        hostname: "silver-nearby-wren-44.mypinata.cloud",
       },
     ],
   },
