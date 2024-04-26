@@ -3,6 +3,9 @@ import { create } from "zustand";
 import { useFlexibleStaking } from "./flexible-staking";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { API } from "@/constants/api";
+import { Abi, NftAddress } from "@/services";
+import { useNFTStaking } from "./nft-staking";
+import wretch from "wretch";
 
 export interface Wallet {
   address: string;
@@ -136,26 +139,73 @@ export const useWalletBalance = create<State & Action>((set, get) => ({
       if (isConnected) return;
       const index = balances.findIndex((b) => !b.isZero());
       const defaultAddress = wallets[index]?.address || "";
+
+      // get default values for flexible staking
       const poolContract = new Contract(
         stakingPool.contract.contract_address,
         stakingPool.contract.contract_abi,
         provider
       );
-      const [getStakedAmount, getUnclaimedRewards] = await Promise.allSettled([
+      Promise.all([
         poolContract.balanceOf(defaultAddress),
         poolContract.earned(defaultAddress),
-      ]);
-      setValues({
-        balance: balances[index] || constants.Zero,
-        stakedAmount:
-          getStakedAmount.status === "fulfilled"
-            ? getStakedAmount.value
-            : constants.Zero,
-        unclaimedRewards:
-          getUnclaimedRewards.status === "fulfilled"
-            ? getUnclaimedRewards.value
-            : constants.Zero,
-      });
+      ])
+        .then(([stakedAmount, unclaimedRewards]) => {
+          setValues({
+            balance: balances[index] || constants.Zero,
+            stakedAmount: BigNumber.isBigNumber(stakedAmount)
+              ? stakedAmount
+              : constants.Zero,
+            unclaimedRewards: BigNumber.isBigNumber(unclaimedRewards)
+              ? unclaimedRewards
+              : constants.Zero,
+          });
+        })
+        .catch(() => {});
+
+      // get default values for nft
+      const nftContract = new Contract(NftAddress.NFT, Abi.Nft, provider);
+      nftContract
+        .totalMaxSupplyOfToken()
+        .then((totalTokenSupply: BigNumber) => {
+          Promise.all(
+            Array.from({ length: Number(totalTokenSupply.toString()) }).map(
+              async (_, i) => ({
+                tokenId: i + 1,
+                owner: await nftContract.ownerOf(i + 1),
+              })
+            )
+          )
+            .then((result) =>
+              result.filter(
+                ({ owner }) =>
+                  owner.toString().toLowerCase() ===
+                  defaultAddress.toLowerCase()
+              )
+            )
+            .then((result) => {
+              useNFTStaking.getState().setValues({
+                nftData: result.map(({ tokenId }) => ({ tokenId })),
+              });
+              return result.map(({ tokenId }) => tokenId);
+            })
+            .then(async (tokenIds) => {
+              Promise.all(
+                tokenIds.map(async (tokenId) => {
+                  const uri = await nftContract.tokenURI(tokenId);
+                  const { name, image } = await wretch(uri)
+                    .get()
+                    .json<{ name?: string; image?: string }>();
+                  return { tokenId, name, image };
+                })
+              ).then((result) => {
+                useNFTStaking.getState().setValues({
+                  nftData: result,
+                });
+              });
+            });
+        })
+        .catch(() => {});
     } catch (err: any) {}
   },
   getConnectedWallet: () =>

@@ -81,7 +81,6 @@ export class StakingPool {
     return this.address;
   }
 
-
   async getRewardClaimableDate(): Promise<number> {
     try {
       const response: BigNumber[] = await this.provider.read({
@@ -234,7 +233,6 @@ export class StakingPool {
       if (txHash) return txHash;
     } catch (error) {
       console.error(error);
-      return;
     }
   }
 
