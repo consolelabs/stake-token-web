@@ -20,7 +20,7 @@ const MOCHI = wretch(MOCHI_API)
   .errorType("json");
 
 export const API = {
-  MOCHI_PROFILE,
   MOCHI_PAY,
   MOCHI,
+  MOCHI_PROFILE,
 };
