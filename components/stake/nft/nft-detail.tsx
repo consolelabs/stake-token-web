@@ -14,6 +14,7 @@ import { useNFTStaking } from "@/store/nft-staking";
 import { utils } from "@consolelabs/mochi-formatter";
 import { truncateWallet } from "@/utils/string";
 import { useWalletNetwork } from "@/hooks/useWalletNetwork";
+import { BASE_PROVIDER_RPC } from "@/envs";
 
 interface Props {
   isStakedNFT: boolean;
@@ -27,7 +28,7 @@ export const NFTDetail = (props: Props) => {
     chain: {
       id: 84532,
       name: "Base",
-      rpc: "https://sepolia.base.org",
+      rpc: BASE_PROVIDER_RPC,
       currency: "ETH",
     },
   });

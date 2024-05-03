@@ -141,7 +141,6 @@ export const NFTCard = (props: Props) => {
       <NFTModal
         open={isOpenNFTModal}
         onOpenChange={(open) => {
-          console.log({ open });
           onOpenChangeNFTModal(open);
           if (!open && searchParams.has(PARAMS.OVERVIEW.NFT)) {
             const nextSearchParams = new URLSearchParams(

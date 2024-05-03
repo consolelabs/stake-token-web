@@ -12,6 +12,7 @@ import { useWalletNetwork } from "@/hooks/useWalletNetwork";
 import Image from "next/image";
 import { LoginWidget } from "@mochi-web3/login-widget";
 import { useState } from "react";
+import { BASE_PROVIDER_RPC } from "@/envs";
 
 interface Props {
   loading?: boolean;
@@ -26,7 +27,7 @@ export const NFTTabContent = (props: Props) => {
     chain: {
       id: 84532,
       name: "Base",
-      rpc: "https://sepolia.base.org",
+      rpc: BASE_PROVIDER_RPC,
       currency: "ETH",
     },
   });

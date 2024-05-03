@@ -3,14 +3,156 @@
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header/header";
 import { NFTList } from "@/components/nft/nft-list";
-import { Button, Separator, Typography } from "@mochi-ui/core";
-import { ArrowTopRightLine } from "@mochi-ui/icons";
-import { useLoginWidget } from "@mochi-web3/login-widget";
+import { BASE_PROVIDER_RPC } from "@/envs";
+import { Abi, LUCKY_POINT, NftAddress } from "@/services";
+import { NftData, useNFTStaking } from "@/store/nft-staking";
+import { retry } from "@/utils/retry";
+import { utils } from "@consolelabs/mochi-formatter";
+import { useDisclosure } from "@dwarvesf/react-hooks";
+import { JsonRpcProvider } from "@ethersproject/providers";
+import {
+  Button,
+  Modal,
+  ModalContent,
+  ModalOverlay,
+  ModalPortal,
+  Separator,
+  Typography,
+  toast,
+} from "@mochi-ui/core";
+import { ArrowTopRightLine, StarSolid } from "@mochi-ui/icons";
+import { LoginWidget } from "@mochi-web3/login-widget";
+import { Contract } from "ethers";
 import Image from "next/image";
-import { Suspense } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import wretch from "wretch";
 
 const NFT = () => {
-  const { isLoggedIn } = useLoginWidget();
+  const { nftContract, nftData, initializeNFTData } = useNFTStaking();
+  const [tiers, setTiers] = useState([0, 0, 0, 0, 0]);
+  const [nftList, setNftList] = useState<NftData[]>([]);
+  const [displayNft, setDisplayNft] = useState<NftData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [minting, setMinting] = useState(false);
+  const {
+    isOpen: isOpenLoginWidget,
+    onOpen: onOpenLoginWidget,
+    onOpenChange: onOpenChangeLoginWidget,
+  } = useDisclosure();
+
+  const mintNft = async () => {
+    if (!nftContract) return;
+    try {
+      setMinting(true);
+      const txHash = await nftContract.mintNft(LUCKY_POINT);
+      if (!txHash) {
+        throw new Error("Failed to mint NFT");
+      }
+      // FIXME: retry to get updated values
+      await retry(
+        async () => {
+          const tokenIds = await nftContract.listTokenIdOfWallet();
+          if (!tokenIds.length || tokenIds.length === nftData.length) {
+            throw new Error("Failed to mint NFT");
+          }
+          return tokenIds;
+        },
+        3000,
+        100
+      );
+      await initializeNFTData();
+      const displayNft = nftData[nftData.length - 1];
+      setDisplayNft(displayNft);
+      toast({
+        scheme: "success",
+        title: "Congratulations! Mint succeeded!",
+        description: "Claim your NFT and start using it to redeem rewards.",
+      });
+    } catch (err: any) {
+      toast({
+        scheme: "danger",
+        title: "Error",
+        description:
+          typeof err.message === "string" ? err.message : "Failed to mint NFT",
+      });
+    } finally {
+      setMinting(false);
+    }
+  };
+
+  const claimNft = () => {
+    setDisplayNft(null);
+    toast({
+      scheme: "success",
+      title: "Successfully Claimed",
+      description: (
+        <Typography
+          level="p7"
+          fontWeight="xl"
+          color="success"
+          className="uppercase"
+        >
+          Check My NFTs
+        </Typography>
+      ),
+    });
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (nftContract) {
+        const tiers = await nftContract.getTierWeight();
+        setTiers(tiers);
+
+        setLoading(true);
+        const data = await nftContract.listItemNft();
+        setNftList(data);
+        setLoading(false);
+      } else {
+        const provider = new JsonRpcProvider(BASE_PROVIDER_RPC);
+        const initNftContract = new Contract(NftAddress.NFT, Abi.Nft, provider);
+
+        // get tiers
+        const initData = await Promise.all(
+          [1, 2, 3, 4, 5].map((i) => initNftContract[`tier${i}Weight`]())
+        );
+        setTiers(initData.map((each) => Number(each.toString()) / 10));
+
+        // get nft list
+        setLoading(true);
+        const baseUri = await initNftContract.getBaseUri();
+        const minItemId = await initNftContract.getMintItemId();
+        const maxItemId = await initNftContract.getMaxItemId();
+        const items = await Promise.all(
+          Array.from(
+            {
+              length:
+                Number(maxItemId.toString()) - Number(minItemId.toString()) + 1,
+            },
+            (_, i) => i + 1
+          ).map(async (id) => {
+            const [{ name, image }, attribute] = await Promise.all([
+              wretch(baseUri + id.toString())
+                .get()
+                .json<{ name: string; image: string }>(),
+              initNftContract.getItemAttribute(id),
+            ]);
+            return {
+              name,
+              image,
+              attribute: {
+                ...attribute,
+                duration: Number(attribute.duration.toString()),
+              },
+            } as NftData;
+          })
+        );
+        setNftList(items);
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [nftContract]);
 
   return (
     <div className="overflow-y-auto h-[calc(100vh-56px)]">
@@ -24,16 +166,42 @@ const NFT = () => {
               <Typography level="h6" fontWeight="lg">
                 Treasure Chest
               </Typography>
-              <Typography level="p4">Lucky --</Typography>
+              <Typography level="p4">
+                Lucky{" "}
+                {utils.formatPercentDigit(
+                  displayNft?.attribute?.boostStaking || 10
+                )}
+              </Typography>
             </div>
             <div className="flex items-center justify-center flex-1">
-              <Image
-                src="/nft/treasure-chest.png"
-                alt=""
-                width={128}
-                height={128}
-              />
+              {displayNft?.image ? (
+                <Image src={displayNft.image} alt="" width={128} height={128} />
+              ) : (
+                <Image
+                  src="/nft/treasure-chest.png"
+                  alt=""
+                  width={128}
+                  height={128}
+                />
+              )}
             </div>
+            {!!displayNft && (
+              <div className="text-center space-y-1">
+                <Typography level="h5" fontWeight="lg">
+                  {displayNft.name}
+                </Typography>
+                <div className="flex justify-center space-x-0.5">
+                  {Array.from({ length: displayNft.attribute?.tier || 0 }).map(
+                    (_, index) => (
+                      <StarSolid
+                        key={index}
+                        className="w-5 h-5 text-warning-outline-border"
+                      />
+                    )
+                  )}
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded bg-background-level2 px-3 py-1.5 flex items-center space-x-2">
                 <Image
@@ -43,13 +211,21 @@ const NFT = () => {
                   height={24}
                 />
                 <Typography level="h7" fontWeight="lg">
-                  --
+                  {displayNft?.attribute?.boostStaking
+                    ? utils.formatPercentDigit(
+                        displayNft.attribute.boostStaking
+                      )
+                    : "--"}
                 </Typography>
               </div>
               <div className="rounded bg-background-level2 px-3 py-1.5 flex items-center space-x-2">
                 <Image src="/svg/hourglass.svg" alt="" width={24} height={24} />
                 <Typography level="h7" fontWeight="lg">
-                  --
+                  {displayNft?.attribute?.duration
+                    ? displayNft.attribute.duration > 1
+                      ? `${displayNft.attribute.duration} days`
+                      : `${displayNft.attribute.duration} day`
+                    : "--"}
                 </Typography>
               </div>
             </div>
@@ -72,42 +248,29 @@ const NFT = () => {
             </div>
             <Separator />
             <div className="grid grid-cols-3 sm:grid-cols-5 sm:px-2 gap-x-4">
-              {[
-                {
-                  title: "Tier 1",
-                  percent: 0.5,
-                },
-                {
-                  title: "Tier 2",
-                  percent: 2.5,
-                },
-                {
-                  title: "Tier 3",
-                  percent: 12,
-                },
-                {
-                  title: "Tier 4",
-                  percent: 35,
-                },
-                {
-                  title: "Tier 5",
-                  percent: 50,
-                },
-              ].map((each) => (
-                <div key={each.title} className="pt-3 pb-4 space-y-0.5">
+              {tiers.map((tier, index) => (
+                <div key={index} className="pt-3 pb-4 space-y-0.5">
                   <Typography level="p5" className="text-text-tertiary">
-                    {each.title}
+                    Tier {index + 1}
                   </Typography>
                   <Typography level="h7" fontWeight="lg">
-                    {each.percent}%
+                    {utils.formatPercentDigit(tier)}
                   </Typography>
                 </div>
               ))}
             </div>
-            {isLoggedIn ? (
-              <Button size="lg">Mint (2)</Button>
+            {nftContract && displayNft ? (
+              <Button size="lg" onClick={claimNft}>
+                Claim
+              </Button>
+            ) : nftContract && !displayNft ? (
+              <Button size="lg" onClick={mintNft} loading={minting}>
+                Mint
+              </Button>
             ) : (
-              <Button size="lg">Login</Button>
+              <Button size="lg" onClick={onOpenLoginWidget}>
+                Connect wallet
+              </Button>
             )}
           </div>
         </div>
@@ -166,9 +329,24 @@ const NFT = () => {
         </div>
       </div>
       <div className="max-w-6xl pb-24 px-4 mx-auto">
-        <NFTList />
+        <NFTList {...{ nftList, loading }} />
       </div>
       <Footer />
+      <Modal open={isOpenLoginWidget} onOpenChange={onOpenChangeLoginWidget}>
+        <ModalPortal>
+          <ModalOverlay />
+          <ModalContent>
+            <LoginWidget
+              raw
+              onchain
+              chain="evm"
+              onWalletConnectSuccess={async () => {
+                onOpenChangeLoginWidget(false);
+              }}
+            />
+          </ModalContent>
+        </ModalPortal>
+      </Modal>
     </div>
   );
 };

@@ -2,13 +2,14 @@ import { Button } from "@mochi-ui/core";
 import { ChevronDownLine } from "@mochi-ui/icons";
 import { TokenImage } from "../token-image";
 import { useWalletNetwork } from "@/hooks/useWalletNetwork";
+import { BASE_PROVIDER_RPC } from "@/envs";
 
 export const NetworkButton = () => {
   const { isConnected, isCorrectNetwork, changeNetwork } = useWalletNetwork({
     chain: {
       id: 84532,
       name: "Base",
-      rpc: "https://sepolia.base.org",
+      rpc: BASE_PROVIDER_RPC,
       currency: "ETH",
     },
   });
