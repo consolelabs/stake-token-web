@@ -11,6 +11,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "silver-nearby-wren-44.mypinata.cloud",
       },
+      {
+        protocol: "https",
+        hostname: "ipfs.io",
+      },
     ],
   },
 };

@@ -130,7 +130,6 @@ export const FlexibleStakePreview = (props: Props) => {
   useEffect(() => {
     if (!initialStep.current) return;
     setStepIndex(initialStep.current);
-    console.log({ initialStep });
     if (initialStep.current === 1) {
       onApprove();
     } else if (initialStep.current === 2) {
