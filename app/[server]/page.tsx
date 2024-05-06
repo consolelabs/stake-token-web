@@ -10,14 +10,14 @@ import { PlusLine, VaultSolid } from "@mochi-ui/icons";
 import { Highlights } from "@/components/overview/highlights";
 import { About } from "@/components/overview/about";
 import { BountyTable } from "@/components/overview/bounty-table";
+import Link from "next/link";
 
 const Overview = () => {
-  const { abort, getInfo } = useServerInfo();
+  const { getInfo } = useServerInfo();
 
   useEffect(() => {
     getInfo();
-    return abort;
-  }, [abort, getInfo]);
+  }, [getInfo]);
 
   return (
     <div
@@ -81,10 +81,12 @@ const Overview = () => {
             <Button variant="link" color="neutral">
               Share
             </Button>
-            <Button variant="outline" color="neutral">
-              <VaultSolid />
-              Stake
-            </Button>
+            <Link href="/staking">
+              <Button variant="outline" color="neutral">
+                <VaultSolid />
+                Stake
+              </Button>
+            </Link>
             <Button>
               <PlusLine />
               Join Server
