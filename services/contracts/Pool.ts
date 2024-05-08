@@ -219,7 +219,7 @@ export class StakingPool {
     }
   }
 
-  async unstake(): Promise<string | undefined> {
+  async unstakeAll(): Promise<string | undefined> {
     try {
       const stakedAmount = await this.getSenderStakedAmount();
       if (!stakedAmount) return;
@@ -227,6 +227,29 @@ export class StakingPool {
         abi: this.abi,
         method: "withdraw",
         args: [stakedAmount.toString()],
+        to: this.address,
+        from: this.sender,
+      });
+      if (txHash) return txHash;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async unstakeWithAmount(amount: number): Promise<string | undefined> {
+    const { token_decimal } = this.stakingToken;
+    const amountWithDecimals = getAmountWithDecimals(amount, token_decimal);
+    try {
+      const stakedAmount = await this.getSenderStakedAmount();
+      if (!stakedAmount) return;
+      if (BigNumber.from(amountWithDecimals).gt(stakedAmount)) {
+        console.log("error: insufficient balance");
+        return;
+      }
+      const txHash = await this.provider.write({
+        abi: this.abi,
+        method: "withdraw",
+        args: [amountWithDecimals],
         to: this.address,
         from: this.sender,
       });

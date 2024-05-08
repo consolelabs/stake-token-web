@@ -94,7 +94,7 @@ export const FlexibleStakingCard = (props: Props) => {
     if (!poolContract) return;
     try {
       setIsUnstaking(true);
-      const txHash = await poolContract.unstake();
+      const txHash = await poolContract.unstakeAll();
       if (!txHash) {
         throw new Error("Failed to unstake");
       }
