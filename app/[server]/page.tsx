@@ -11,9 +11,12 @@ import { Highlights } from "@/components/overview/highlights";
 import { About } from "@/components/overview/about";
 import { BountyTable } from "@/components/overview/bounty-table";
 import Link from "next/link";
+import { ROUTES } from "@/constants/routes";
+import { useParams } from "next/navigation";
 
 const Overview = () => {
-  const { getInfo } = useServerInfo();
+  const params = useParams();
+  const { abort, getInfo } = useServerInfo();
 
   useEffect(() => {
     getInfo();
@@ -81,7 +84,7 @@ const Overview = () => {
             <Button variant="link" color="neutral">
               Share
             </Button>
-            <Link href="/staking">
+            <Link href={ROUTES.EARN(params.server as string)}>
               <Button variant="outline" color="neutral">
                 <VaultSolid />
                 Stake

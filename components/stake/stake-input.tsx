@@ -13,10 +13,18 @@ interface Props {
   amount: TokenAmount;
   convertedValue: number;
   setAmount: Dispatch<SetStateAction<TokenAmount>>;
+  type?: "stake" | "unstake";
 }
 
 export const StakeInput = (props: Props) => {
-  const { token, balance = 0, amount, convertedValue, setAmount } = props;
+  const {
+    token,
+    balance = 0,
+    amount,
+    convertedValue,
+    setAmount,
+    type = "stake",
+  } = props;
   const [percent, setPercent] = useState(0);
 
   const onMaxAmount = () => {
@@ -78,7 +86,7 @@ export const StakeInput = (props: Props) => {
     <div className="rounded-xl bg-background-level2 p-3 space-y-3">
       <div className="flex items-center justify-between min-h-[34px]">
         <Typography level="h9" color="textSecondary">
-          You’re staking
+          {type === "stake" ? "You're staking" : "You're unstaking"}
         </Typography>
         {/* <div className="flex items-center space-x-2">
           <label className="text-[13px] text-text-tertiary">Auto-Staking</label>
@@ -170,7 +178,7 @@ export const StakeInput = (props: Props) => {
             ≈ ${utils.formatDigit({ value: convertedValue })} USD
           </Typography>
           <Typography className="!text-[13px] text-text-tertiary">
-            Balance:{" "}
+            {type === "stake" ? "Balance" : "Staking"}:{" "}
             <button onClick={onMaxAmount}>
               {utils.formatDigit({ value: balance })} {token?.token_symbol}
             </button>

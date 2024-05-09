@@ -18,7 +18,7 @@ import { LoginWidget, useLoginWidget } from "@mochi-web3/login-widget";
 import { ReactNode, useEffect, useRef } from "react";
 import { utils } from "@consolelabs/mochi-formatter";
 import { useParams, useRouter } from "next/navigation";
-import { ROUTES } from "@/constants/routes";
+import { PARAMS, ROUTES } from "@/constants/routes";
 import { useFlexibleStaking } from "@/store/flexible-staking";
 import Image from "next/image";
 import {
@@ -26,7 +26,6 @@ import {
   Discord,
   LifeBuoySolid,
   WalletAddSolid,
-  WalletSolid,
   X,
 } from "@mochi-ui/icons";
 import { useWalletBalance } from "@/store/wallet-balance";
@@ -35,6 +34,7 @@ import { formatUnits } from "ethers/lib/utils";
 import { getUsdAmount } from "@/utils/number";
 import { useDisclosure } from "@dwarvesf/react-hooks";
 import Link from "next/link";
+import { useNFTStaking } from "@/store/nft-staking";
 
 const DropdownContent = () => {
   const { profile, logout } = useLoginWidget();
@@ -47,6 +47,7 @@ const DropdownContent = () => {
     balance: flexibleStakingBalance,
     stakingToken: flexibleStakingToken,
   } = useFlexibleStaking();
+  const { reset: resetNFTStaking } = useNFTStaking();
   const {
     isOpen: isOpenLoginWidget,
     onOpen: onOpenLoginWidget,
@@ -143,7 +144,7 @@ const DropdownContent = () => {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-      <Link href={ROUTES.OVERVIEW_NFT(params.server)}>
+      <Link href={`?modal=${PARAMS.OVERVIEW.NFT}`}>
         <DropdownMenuItem
           leftIcon={
             <Image src="/svg/image.svg" alt="" width={20} height={20} />
@@ -166,6 +167,7 @@ const DropdownContent = () => {
       <DropdownMenuItem
         onClick={() => {
           resetFlexibleStaking();
+          resetNFTStaking();
           logout();
           push(ROUTES.HOME);
         }}
