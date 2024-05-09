@@ -15,6 +15,7 @@ import { utils } from "@consolelabs/mochi-formatter";
 import { truncateWallet } from "@/utils/string";
 import { useWalletNetwork } from "@/hooks/useWalletNetwork";
 import { BASE_PROVIDER_RPC } from "@/envs";
+import Link from "next/link";
 
 interface Props {
   isStakedNFT: boolean;
@@ -156,13 +157,19 @@ export const NFTDetail = (props: Props) => {
             {[
               {
                 label: "Contract address",
-                content: data ? (
-                  <Typography level="h9" color="primary">
-                    {truncateWallet(nftContract?.getAddress() || "-")}
-                  </Typography>
-                ) : (
-                  <Typography level="h9">-</Typography>
-                ),
+                content:
+                  data && nftContract?.getAddress() ? (
+                    <Button variant="link" className="pl-0 pr-0 h-fit" asChild>
+                      <Link
+                        target="_blank"
+                        href={`https://sepolia.basescan.org/address/${nftContract.getAddress()}#readContract`}
+                      >
+                        {truncateWallet(nftContract.getAddress())}
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Typography level="h9">-</Typography>
+                  ),
               },
               {
                 label: "Token ID",

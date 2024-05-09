@@ -14,6 +14,7 @@ export interface NftData {
 interface State {
   nftContract: NFT | null;
   nftData: NftData[];
+  stakedNfts: NftData[];
 }
 
 interface Action {
@@ -26,6 +27,7 @@ interface Action {
 const initialState: State = {
   nftContract: null,
   nftData: [],
+  stakedNfts: [],
 };
 
 export const useNFTStaking = create<State & Action>((set, get) => ({

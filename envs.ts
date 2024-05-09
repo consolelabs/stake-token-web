@@ -8,6 +8,9 @@ export const MOCHI_PAY_API = `${
 export const MOCHI_API = `${
   process.env.NEXT_PUBLIC_MOCHI_API_HOST || "mochi-api"
 }/api/v1`;
+export const TONO_API = `${
+  process.env.NEXT_PUBLIC_TONO_API_HOST || "tono-api"
+}/api/v1`;
 export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN || "";
 export const OPERATOR_WALLET_KEY =
   process.env.NEXT_PUBLIC_OPERATOR_WALLET_KEY || "";

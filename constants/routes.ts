@@ -1,8 +1,8 @@
 export const ROUTES = {
   HOME: "/",
   OVERVIEW: "/dwarves",
-  OVERVIEW_NFT: (server: string) => `/${server}?${PARAMS.OVERVIEW.NFT}`,
   NFT: (server: string) => `/${server}/nft`,
+  EARN: (server: string) => `/${server}/earn`,
 };
 
 export const PARAMS = {

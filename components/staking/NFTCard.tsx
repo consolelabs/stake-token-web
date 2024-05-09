@@ -3,17 +3,10 @@ import { Card } from "./Card";
 import Image from "next/image";
 import { PlusCircleSolid } from "@mochi-ui/icons";
 import { useEffect, useState } from "react";
-import { useDisclosure } from "@dwarvesf/react-hooks";
-import { NFTModal } from "../stake/nft/nft-modal";
 import { useNFTStaking } from "@/store/nft-staking";
 import Link from "next/link";
 import { PARAMS, ROUTES } from "@/constants/routes";
-import {
-  useParams,
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 interface Props {
   hidden: boolean;
@@ -23,24 +16,10 @@ export const NFTCard = (props: Props) => {
   const { hidden } = props;
   const searchParams = useSearchParams();
   const router = useRouter();
-
-  const {
-    isOpen: isOpenNFTModal,
-    onOpenChange: onOpenChangeNFTModal,
-    onOpen: onOpenNFTModal,
-  } = useDisclosure();
-  const pathname = usePathname();
   const params = useParams();
-  const { nftData } = useNFTStaking();
+  const { nftData, stakedNfts } = useNFTStaking();
 
   const images = nftData.flatMap((data) => data.image || []);
-
-  const shouldOpenModal = searchParams.has(PARAMS.OVERVIEW.NFT);
-  useEffect(() => {
-    if (shouldOpenModal) {
-      onOpenNFTModal();
-    }
-  }, [onOpenNFTModal, shouldOpenModal]);
 
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
@@ -89,7 +68,7 @@ export const NFTCard = (props: Props) => {
           },
         ]}
         actions={
-          nftData.length ? (
+          stakedNfts.length ? (
             [
               <Button
                 key="unstake"
@@ -98,14 +77,18 @@ export const NFTCard = (props: Props) => {
               >
                 Unstake
               </Button>,
-              <Button key="stake" onClick={onOpenNFTModal}>
-                Stake
+              <Button key="stake" asChild>
+                <Link key="stake" href={`?modal=${PARAMS.OVERVIEW.NFT}`}>
+                  Stake
+                </Link>
               </Button>,
             ]
           ) : (
-            <Button className="col-span-2" onClick={onOpenNFTModal}>
-              Stake
-              <PlusCircleSolid className="w-4 h-4" />
+            <Button className="col-span-2" asChild>
+              <Link key="stake" href={`?modal=${PARAMS.OVERVIEW.NFT}`}>
+                Stake
+                <PlusCircleSolid className="w-4 h-4" />
+              </Link>
             </Button>
           )
         }
@@ -120,7 +103,10 @@ export const NFTCard = (props: Props) => {
                 <Image key={src} src={src} alt="" width={32} height={32} />
               ))}
               {images.length > 3 && (
-                <div className="relative">
+                <Link
+                  className="relative cursor-pointer"
+                  href={`?modal=${PARAMS.OVERVIEW.NFT}`}
+                >
                   <Image
                     src="/nft/amanita-muscaria.png"
                     alt=""
@@ -132,24 +118,11 @@ export const NFTCard = (props: Props) => {
                       +{images.length - 3}
                     </div>
                   )}
-                </div>
+                </Link>
               )}
             </div>
           ) : null
         }
-      />
-      <NFTModal
-        open={isOpenNFTModal}
-        onOpenChange={(open) => {
-          onOpenChangeNFTModal(open);
-          if (!open && searchParams.has(PARAMS.OVERVIEW.NFT)) {
-            const nextSearchParams = new URLSearchParams(
-              searchParams.toString()
-            );
-            nextSearchParams.delete(PARAMS.OVERVIEW.NFT);
-            router.replace(`${pathname}?${nextSearchParams}`);
-          }
-        }}
       />
     </>
   );

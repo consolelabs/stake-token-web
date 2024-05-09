@@ -91,7 +91,6 @@ export class StakingPool {
       });
 
       if (response?.length && BigNumber.isBigNumber(response[0])) {
-        console.log("lastDepositOrWithdrawTimestamp", response[0].toBigInt());
         return response[0].add(43200).toNumber();
       }
 
@@ -146,7 +145,6 @@ export class StakingPool {
         args: [this.sender],
         to: this.address,
       });
-      console.log("getClaimedRewardsForAddress: ", response);
       if (response?.length && BigNumber.isBigNumber(response[0])) {
         return response[0];
       }
@@ -164,7 +162,6 @@ export class StakingPool {
         args: [this.sender],
         to: this.address,
       });
-      console.log("getRewardAvailableForClaim: ", response);
       if (response?.length && BigNumber.isBigNumber(response[0])) {
         return response[0];
       }
@@ -219,7 +216,7 @@ export class StakingPool {
     }
   }
 
-  async unstake(): Promise<string | undefined> {
+  async unstakeAll(): Promise<string | undefined> {
     try {
       const stakedAmount = await this.getSenderStakedAmount();
       if (!stakedAmount) return;
@@ -227,6 +224,28 @@ export class StakingPool {
         abi: this.abi,
         method: "withdraw",
         args: [stakedAmount.toString()],
+        to: this.address,
+        from: this.sender,
+      });
+      if (txHash) return txHash;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async unstakeWithAmount(amount: number): Promise<string | undefined> {
+    const { token_decimal } = this.stakingToken;
+    const amountWithDecimals = getAmountWithDecimals(amount, token_decimal);
+    try {
+      const stakedAmount = await this.getSenderStakedAmount();
+      if (!stakedAmount) return;
+      if (BigNumber.from(amountWithDecimals).gt(stakedAmount)) {
+        return;
+      }
+      const txHash = await this.provider.write({
+        abi: this.abi,
+        method: "withdraw",
+        args: [amountWithDecimals],
         to: this.address,
         from: this.sender,
       });
