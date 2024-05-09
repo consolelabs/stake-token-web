@@ -38,7 +38,7 @@ export const FlexibleStakeResponse = (props: Props) => {
         </Typography>
         <div className="flex items-center justify-between">
           <Typography level="p4" className="text-text-tertiary">
-            You’re staking
+            You&apos;re staking
           </Typography>
           <div className="flex items-center space-x-1">
             <TokenImage symbol={stakingToken?.token_symbol} size={24} />

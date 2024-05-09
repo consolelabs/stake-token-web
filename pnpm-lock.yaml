@@ -21,8 +21,8 @@ dependencies:
     specifier: ^0.14.1
     version: 0.14.1(@types/react-dom@18.0.0)(@types/react@18.2.79)(react-dom@18.0.0)(react@18.2.0)(tailwindcss@3.3.0)
   '@mochi-ui/icons':
-    specifier: ^0.7.5
-    version: 0.7.5(react-dom@18.0.0)(react@18.2.0)
+    specifier: ^0.8.0
+    version: 0.8.0(react-dom@18.0.0)(react@18.2.0)
   '@mochi-ui/theme':
     specifier: ^0.20.0
     version: 0.20.0(tailwindcss@3.3.0)
@@ -47,6 +47,12 @@ dependencies:
   clsx:
     specifier: ^2.1.0
     version: 2.1.0
+  color:
+    specifier: ^4.2.3
+    version: 4.2.3
+  dayjs:
+    specifier: ^1.11.10
+    version: 1.11.10
   ethers:
     specifier: 5.7.2
     version: 5.7.2
@@ -79,6 +85,9 @@ devDependencies:
   '@typechain/ethers-v5':
     specifier: ^11.1.2
     version: 11.1.2(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(ethers@5.7.2)(typechain@8.3.2)(typescript@5.0.2)
+  '@types/color':
+    specifier: ^3.0.6
+    version: 3.0.6
   '@types/node':
     specifier: ^20
     version: 20.0.0
@@ -3798,6 +3807,22 @@ packages:
       typescript: 5.0.2
     dev: true
 
+  /@types/color-convert@2.0.3:
+    resolution: {integrity: sha512-2Q6wzrNiuEvYxVQqhh7sXM2mhIhvZR/Paq4FdsQkOMgWsCIkKvSGj8Le1/XalulrmgOzPMqNa0ix+ePY4hTrfg==}
+    dependencies:
+      '@types/color-name': 1.1.4
+    dev: true
+
+  /@types/color-name@1.1.4:
+    resolution: {integrity: sha512-hulKeREDdLFesGQjl96+4aoJSHY5b2GRjagzzcqCfIrWhe5vkCqIvrLbqzBaI1q94Vg8DNJZZqTR5ocdWmWclg==}
+    dev: true
+
+  /@types/color@3.0.6:
+    resolution: {integrity: sha512-NMiNcZFRUAiUUCCf7zkAelY8eV3aKqfbzyFQlXpPIEeoNDbsEHGpb854V3gzTsGKYj830I5zPuOwU/TP5/cW6A==}
+    dependencies:
+      '@types/color-convert': 2.0.3
+    dev: true
+
   /@types/connect@3.4.38:
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
     dependencies:
@@ -5411,6 +5436,10 @@ packages:
     engines: {node: '>=6'}
     dependencies:
       time-zone: 1.0.0
+    dev: false
+
+  /dayjs@1.11.10:
+    resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
     dev: false
 
   /debug@3.2.7:

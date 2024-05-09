@@ -7,7 +7,8 @@ import { Platform } from "@consolelabs/mochi-formatter";
 import { AUTH_TELEGRAM_ID, MOCHI_PROFILE_API } from "@/envs";
 import { Toaster } from "@mochi-ui/core";
 import { useTokenStaking } from "@/store/token-staking";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
+import { NFTModal } from "@/components/stake/nft/nft-modal";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -36,6 +37,9 @@ export default function RootLayout({
           profileApi={MOCHI_PROFILE_API}
         >
           {children as any}
+          <Suspense fallback={null}>
+            <NFTModal />
+          </Suspense>
         </LoginWidgetProvider>
         <div className="fixed top-16 right-6 z-50 max-w-[500px] pointer-events-none mx-auto">
           <Toaster />
