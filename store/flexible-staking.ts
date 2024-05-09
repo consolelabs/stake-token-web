@@ -32,11 +32,19 @@ interface State {
     txHash: string;
     amount: number;
   } | null;
+  latestUnstaking: {
+    txHash: string;
+    amount: number;
+    rewards: number;
+    date: Date;
+  } | null;
 }
 
 interface Action {
   reset: () => void;
-  setValues: (values: Partial<State>) => void;
+  setValues: (
+    values: Partial<State> | ((values: State) => Partial<State>)
+  ) => void;
   updateValues: () => Promise<void>;
   initializeContract: (address: string, provider: ChainProvider) => void;
   initializeValues: () => Promise<void>;
@@ -59,6 +67,7 @@ const initialState: State = {
   rewardClaimableDate: 0,
   autoStaking: true,
   latestStaking: null,
+  latestUnstaking: null,
 };
 
 export const useFlexibleStaking = create<State & Action>((set, get) => ({
@@ -74,7 +83,10 @@ export const useFlexibleStaking = create<State & Action>((set, get) => ({
     } = initialState;
     set(resetValues);
   },
-  setValues: (values) => set((state) => ({ ...state, ...values })),
+  setValues: (values) =>
+    typeof values === "function"
+      ? set((state) => ({ ...state, ...values(state) }))
+      : set((state) => ({ ...state, ...values })),
   initializeValues: async () => {
     const stakingPool = useTokenStaking
       .getState()

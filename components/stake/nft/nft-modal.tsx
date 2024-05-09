@@ -23,19 +23,18 @@ import clsx from "clsx";
 import { StakedNFTTab } from "./staked-nft-tab";
 import { NFTDetail } from "./nft-detail";
 import { useNFTStaking } from "@/store/nft-staking";
-
-interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { PARAMS } from "@/constants/routes";
 
 const TABS = {
   MY_NFTS: "MY_NFTS",
   STAKED_NFTS: "STAKED_NFTS",
 } as const;
 
-export const NFTModal = (props: Props) => {
-  const { open, onOpenChange } = props;
+export const NFTModal = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { nftContract, initializeNFTData } = useNFTStaking();
   const [tab, setTab] = useState<keyof typeof TABS>(TABS.MY_NFTS);
   const [previewIndex, setPreviewIndex] = useState(0);
@@ -69,6 +68,16 @@ export const NFTModal = (props: Props) => {
     };
     init();
   }, [initializeNFTData, nftContract]);
+
+  const modal = searchParams.get("modal");
+  const open = modal === PARAMS.OVERVIEW.NFT;
+  const onOpenChange = (open: boolean) => {
+    if (!open) {
+      const nextSearchParams = new URLSearchParams(searchParams.toString());
+      nextSearchParams.delete("modal");
+      router.replace(`${pathname}?${nextSearchParams}`);
+    }
+  };
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>

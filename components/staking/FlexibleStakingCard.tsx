@@ -18,6 +18,8 @@ import { Countdown } from "./Countdown";
 import { retry } from "@/utils/retry";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { TokenImage } from "../token-image";
+import { useRecursiveTimeout } from "@/hooks/useRecursiveTimeout";
+import { FlexibleUnstakeModal } from "../stake/flexible/flexible-unstake-modal";
 
 interface Props {
   hidden: boolean;
@@ -35,7 +37,6 @@ export const FlexibleStakingCard = (props: Props) => {
     stakingPool,
     stakingToken,
     rewardToken,
-    autoStaking,
     rewardClaimableDate,
     poolContract,
     setValues,
@@ -48,8 +49,12 @@ export const FlexibleStakingCard = (props: Props) => {
     onOpenChange: onOpenChangeFlexibleStakeModal,
     onOpen: onOpenFlexibleStakeModal,
   } = useDisclosure();
+  const {
+    isOpen: isOpenFlexibleUnstakeModal,
+    onOpenChange: onOpenChangeFlexibleUnstakeModal,
+    onOpen: onOpenFlexibleUnstakeModal,
+  } = useDisclosure();
   const [isClaiming, setIsClaiming] = useState(false);
-  const [isUnstaking, setIsUnstaking] = useState(false);
 
   const onClaim = async () => {
     if (!poolContract) return;
@@ -90,38 +95,15 @@ export const FlexibleStakingCard = (props: Props) => {
     }
   };
 
-  const onUnstake = async () => {
+  const updateRewards = async () => {
     if (!poolContract) return;
-    try {
-      setIsUnstaking(true);
-      const txHash = await poolContract.unstake();
-      if (!txHash) {
-        throw new Error("Failed to unstake");
-      }
-      // FIXME: retry to get updated values
-      await retry(
-        async () => {
-          const newStakedAmount = await poolContract.getSenderStakedAmount();
-          if (!newStakedAmount || newStakedAmount.eq(stakedAmount)) {
-            throw new Error("Failed to unstake");
-          }
-          return newStakedAmount;
-        },
-        3000,
-        100
-      );
-      await updateValues();
-    } catch (err: any) {
-      toast({
-        scheme: "danger",
-        title: "Error",
-        description:
-          typeof err.message === "string" ? err.message : "Failed to unstake",
-      });
-    } finally {
-      setIsUnstaking(false);
-    }
+    const unclaimedRewards = await poolContract.getRewardAvailableForClaim();
+    if (!unclaimedRewards) return;
+    setValues({ unclaimedRewards });
   };
+  useRecursiveTimeout(async () => {
+    await updateRewards();
+  }, 1000);
 
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
@@ -279,7 +261,7 @@ export const FlexibleStakingCard = (props: Props) => {
             : [
                 {
                   value: (
-                    <Button variant="outline" onClick={onBoost}>
+                    <Button variant="outline" onClick={onBoost} disabled>
                       Boost
                     </Button>
                   ),
@@ -298,8 +280,7 @@ export const FlexibleStakingCard = (props: Props) => {
                 key="unstake"
                 variant="outline"
                 className="bg-background-level1"
-                disabled={isUnstaking}
-                onClick={onUnstake}
+                onClick={onOpenFlexibleUnstakeModal}
               >
                 Unstake
               </Button>,
@@ -344,6 +325,10 @@ export const FlexibleStakingCard = (props: Props) => {
       <FlexibleStakeModal
         open={isOpenFlexibleStakeModal}
         onOpenChange={onOpenChangeFlexibleStakeModal}
+      />
+      <FlexibleUnstakeModal
+        open={isOpenFlexibleUnstakeModal}
+        onOpenChange={onOpenChangeFlexibleUnstakeModal}
       />
     </>
   );

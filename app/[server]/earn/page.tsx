@@ -4,7 +4,7 @@ import { Footer } from "@/components/footer";
 import { Button, IconButton, Typography } from "@mochi-ui/core";
 import { EyeHiddenSolid, EyeShowSolid } from "@mochi-ui/icons";
 import { useLoginWidget } from "@mochi-web3/login-widget";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { FlexibleStakingCard } from "@/components/staking/FlexibleStakingCard";
 import { FixedStakingCard } from "@/components/staking/FixedStakingCard";
 import { NFTCard } from "@/components/staking/NFTCard";
@@ -12,7 +12,6 @@ import { useFlexibleStaking } from "@/store/flexible-staking";
 import { utils } from "@consolelabs/mochi-formatter";
 import { useTokenStaking } from "@/store/token-staking";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
-import clsx from "clsx";
 import { TokenImage } from "@/components/token-image";
 import { Header } from "@/components/header/header";
 
@@ -28,8 +27,10 @@ const Overview = () => {
   } = useFlexibleStaking();
   const [showInfo, setShowInfo] = useState(false);
 
+  const initShowInfo = useRef(false);
   useEffect(() => {
-    if (!!balance && !showInfo) {
+    if (!!balance && !balance.isZero() && !showInfo && !initShowInfo.current) {
+      initShowInfo.current = true;
       setShowInfo(true);
     }
   }, [balance, showInfo]);
@@ -81,10 +82,10 @@ const Overview = () => {
                   </IconButton>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <Button variant="link" className="pr-0 pl-0 h-fit">
+                  <Button variant="link" className="pr-0 pl-0 h-fit" disabled>
                     Claim all
                   </Button>
-                  <Button variant="link" className="pr-0 pl-0 h-fit">
+                  <Button variant="link" className="pr-0 pl-0 h-fit" disabled>
                     Restake
                   </Button>
                 </div>
@@ -154,12 +155,7 @@ const Overview = () => {
             </div>
           )}
         </div>
-        <div
-          className={clsx("grid grid-cols-1 mx-auto gap-4", {
-            "md:grid-cols-2": stakingPools.length >= 2,
-            "lg:grid-cols-3": stakingPools.length >= 3,
-          })}
-        >
+        <div className="flex flex-wrap justify-center gap-6">
           {stakingPools.some((each) => each.type === "flexible") && (
             <FlexibleStakingCard hidden={isLoggedIn && !showInfo} />
           )}
@@ -169,6 +165,7 @@ const Overview = () => {
           {stakingPools.some((each) => each.type === "nft") && (
             <NFTCard hidden={isLoggedIn && !showInfo} />
           )}
+          <NFTCard hidden={isLoggedIn && !showInfo} />
         </div>
       </div>
       <Footer />
