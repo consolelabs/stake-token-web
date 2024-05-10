@@ -1,6 +1,6 @@
 import { Button, Typography } from "@mochi-ui/core";
 import { ArrowTopRightLine, CheckCircleHalfColoredLine } from "@mochi-ui/icons";
-import { formatDate } from "@/utils/datetime";
+import { formatDateToDateTime } from "@/utils/datetime";
 import { useFlexibleStaking } from "@/store/flexible-staking";
 import Link from "next/link";
 import { formatTokenAmount } from "@/utils/number";
@@ -47,8 +47,8 @@ export const FlexibleUnstakeResponse = (props: Props) => {
         </div>
         <div className="rounded-lg border border-divider p-4 space-y-2">
           <div className="flex items-center justify-between">
-            <Typography level="p5">Today</Typography>
-            <Typography level="p5">{formatDate(date)}</Typography>
+            <Typography level="p5">Date</Typography>
+            <Typography level="p5">{formatDateToDateTime(date)}</Typography>
           </div>
           <div className="flex items-center justify-between">
             <Typography level="p5">APY</Typography>
@@ -62,15 +62,7 @@ export const FlexibleUnstakeResponse = (props: Props) => {
           <div className="flex items-center justify-between">
             <Typography level="p5">Current reward</Typography>
             <Typography level="p5">
-              {
-                formatTokenAmount(
-                  formatUnits(
-                    unclaimedRewardsRef.current,
-                    rewardToken?.token_decimal
-                  )
-                ).display
-              }{" "}
-              {rewardToken?.token_symbol}
+              {formatTokenAmount(rewards).display} {rewardToken?.token_symbol}
             </Typography>
           </div>
           <div className="flex items-center justify-between">

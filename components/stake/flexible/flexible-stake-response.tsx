@@ -84,7 +84,7 @@ export const FlexibleStakeResponse = (props: Props) => {
             </Typography>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           <Tooltip
             content="Auto-Staking automates the process of topping up your margin wallet, saving you from manually transferring funds before each trade. This is especially useful if you plan on making frequent trades."
             className="max-w-xs text-center z-50"
@@ -99,7 +99,7 @@ export const FlexibleStakeResponse = (props: Props) => {
           <Typography level="p5" className="text-text-tertiary">
             Potential for profit maximization
           </Typography>
-        </div>
+        </div> */}
       </div>
       <div className="mt-8 grid grid-cols-2 gap-3">
         <Button size="lg" variant="outline" color="neutral" onClick={onClose}>
