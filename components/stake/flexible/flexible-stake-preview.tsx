@@ -143,7 +143,9 @@ export const FlexibleStakePreview = (props: Props) => {
       <div className="py-3 grid grid-cols-2 gap-2 items-center">
         <Typography level="p4">You&apos;re staking</Typography>
         <Typography level="p5" className="text-text-tertiary text-right">
-          ~ {utils.formatUsdDigit(amount * (stakingToken?.token_price || 1))}
+          {stakingToken?.token_price
+            ? `~ ${utils.formatUsdDigit(amount * stakingToken.token_price)}`
+            : ""}
         </Typography>
         <div className="flex items-center space-x-2">
           <TokenImage symbol={stakingToken?.token_symbol} size={24} />
@@ -164,7 +166,7 @@ export const FlexibleStakePreview = (props: Props) => {
         >
           {[
             {
-              title: "Approve spending cap",
+              title: "Increase spending cap",
               description:
                 "Please approve spending cap in your wallet extension",
             },

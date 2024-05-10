@@ -14,8 +14,8 @@ import { useFlexibleStaking } from "@/store/flexible-staking";
 import { LoginWidget } from "@mochi-web3/login-widget";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { useWalletNetwork } from "@/hooks/useWalletNetwork";
-import { formatDate } from "@/utils/datetime";
 import { utils } from "@consolelabs/mochi-formatter";
+import DateTime from "@/components/common/DateTime";
 
 interface Props {
   container: HTMLDivElement | null;
@@ -61,8 +61,10 @@ export const FlexibleUnstakeContent = (props: Props) => {
             Unstake now
           </Typography>
           <div className="flex items-center justify-between">
-            <Typography level="p5">Today</Typography>
-            <Typography level="p5">{formatDate(new Date())}</Typography>
+            <Typography level="p5">Date</Typography>
+            <Typography level="p5">
+              <DateTime />
+            </Typography>
           </div>
           <div className="flex items-center justify-between">
             <Typography level="p5">APY</Typography>

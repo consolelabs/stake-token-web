@@ -1,25 +1,16 @@
-import {
-  Badge,
-  Button,
-  Typography,
-  ValueChange,
-  ValueChangeIndicator,
-  toast,
-} from "@mochi-ui/core";
+import { Badge, Button, Typography } from "@mochi-ui/core";
 import { Card } from "./Card";
-import Image from "next/image";
 import { utils } from "@consolelabs/mochi-formatter";
 import { useDisclosure } from "@dwarvesf/react-hooks";
-import { MinusLine, PlusCircleSolid, PlusLine, Spinner } from "@mochi-ui/icons";
+import { PlusCircleSolid } from "@mochi-ui/icons";
 import { FlexibleStakeModal } from "../stake/flexible/flexible-stake-modal";
 import { useFlexibleStaking } from "@/store/flexible-staking";
 import { useEffect, useState } from "react";
-import { Countdown } from "./Countdown";
-import { retry } from "@/utils/retry";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { TokenImage } from "../token-image";
 import { useRecursiveTimeout } from "@/hooks/useRecursiveTimeout";
 import { FlexibleUnstakeModal } from "../stake/flexible/flexible-unstake-modal";
+import { formatTokenAmount } from "@/utils/number";
 
 interface Props {
   hidden: boolean;
@@ -33,17 +24,15 @@ export const FlexibleStakingCard = (props: Props) => {
     stakedAmount,
     unclaimedRewards,
     poolStakedAmount,
-    nftBoost,
     stakingPool,
     stakingToken,
     rewardToken,
-    rewardClaimableDate,
     poolContract,
     setValues,
-    updateValues,
     initializeValues,
+    updateValues,
   } = useFlexibleStaking();
-  const { isOpen: isBoosting, onOpen: onBoost } = useDisclosure();
+  const { isOpen: isBoosting } = useDisclosure();
   const {
     isOpen: isOpenFlexibleStakeModal,
     onOpenChange: onOpenChangeFlexibleStakeModal,
@@ -54,46 +43,6 @@ export const FlexibleStakingCard = (props: Props) => {
     onOpenChange: onOpenChangeFlexibleUnstakeModal,
     onOpen: onOpenFlexibleUnstakeModal,
   } = useDisclosure();
-  const [isClaiming, setIsClaiming] = useState(false);
-
-  const onClaim = async () => {
-    if (!poolContract) return;
-    try {
-      setIsClaiming(true);
-      const txHash = await poolContract.claimReward();
-      if (!txHash) {
-        throw new Error("Failed to claim rewards");
-      }
-      // FIXME: retry to get updated values
-      await retry(
-        async () => {
-          const newUnclaimedRewards =
-            await poolContract.getRewardAvailableForClaim();
-          if (
-            !newUnclaimedRewards ||
-            newUnclaimedRewards.eq(unclaimedRewards)
-          ) {
-            throw new Error("Failed to claim rewards");
-          }
-          return newUnclaimedRewards;
-        },
-        3000,
-        100
-      );
-      await updateValues();
-    } catch (err: any) {
-      toast({
-        scheme: "danger",
-        title: "Error",
-        description:
-          typeof err.message === "string"
-            ? err.message
-            : "Failed to claim rewards",
-      });
-    } finally {
-      setIsClaiming(false);
-    }
-  };
 
   const updateRewards = async () => {
     if (!poolContract) return;
@@ -104,6 +53,10 @@ export const FlexibleStakingCard = (props: Props) => {
   useRecursiveTimeout(async () => {
     await updateRewards();
   }, 1000);
+
+  useRecursiveTimeout(async () => {
+    await updateValues();
+  }, 5000);
 
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
@@ -154,14 +107,18 @@ export const FlexibleStakingCard = (props: Props) => {
           },
           {
             label: "TVL",
-            value: utils.formatUsdDigit(
-              formatUnits(
-                poolStakedAmount
-                  .mul(parseUnits(String(stakingToken?.token_price || 1)))
-                  .div(parseUnits("1")),
-                stakingToken?.token_decimal
-              )
-            ),
+            value: stakingToken?.token_price
+              ? utils.formatUsdDigit(
+                  formatUnits(
+                    poolStakedAmount
+                      .mul(parseUnits(String(stakingToken.token_price)))
+                      .div(parseUnits("1")),
+                    stakingToken?.token_decimal
+                  )
+                )
+              : `${utils.formatTokenDigit(
+                  formatUnits(poolStakedAmount, stakingToken?.token_decimal)
+                )} ${stakingToken?.token_symbol}`,
           },
         ]}
         items={[
@@ -179,14 +136,16 @@ export const FlexibleStakingCard = (props: Props) => {
                 </Typography>
               </div>
             ),
-            convertedValue: utils.formatUsdDigit(
-              formatUnits(
-                balance
-                  .mul(parseUnits(String(stakingToken?.token_price || 1)))
-                  .div(parseUnits("1")),
-                stakingToken?.token_decimal
-              )
-            ),
+            convertedValue: stakingToken?.token_price
+              ? utils.formatUsdDigit(
+                  formatUnits(
+                    balance
+                      .mul(parseUnits(String(stakingToken.token_price)))
+                      .div(parseUnits("1")),
+                    stakingToken?.token_decimal
+                  )
+                )
+              : undefined,
             hidden,
           },
           {
@@ -203,70 +162,71 @@ export const FlexibleStakingCard = (props: Props) => {
                 </Typography>
               </div>
             ),
-            convertedValue: stakedAmount.isZero()
-              ? undefined
-              : utils.formatUsdDigit(
-                  formatUnits(
-                    stakedAmount
-                      .mul(parseUnits(String(stakingToken?.token_price || 1)))
-                      .div(parseUnits("1")),
-                    stakingToken?.token_decimal
-                  )
-                ),
+            convertedValue:
+              stakedAmount.isZero() || !stakingToken?.token_price
+                ? undefined
+                : utils.formatUsdDigit(
+                    formatUnits(
+                      stakedAmount
+                        .mul(parseUnits(String(stakingToken.token_price)))
+                        .div(parseUnits("1")),
+                      stakingToken?.token_decimal
+                    )
+                  ),
             hidden,
           },
-          {
-            label: "My NFTs Boost",
-            value: nftBoost.isZero() ? (
-              "0"
-            ) : (
-              <ValueChange
-                trend={nftBoost.isNegative() ? "down" : "up"}
-                className="!gap-0.5 font-semibold"
-              >
-                <ValueChangeIndicator>
-                  {nftBoost.isNegative() ? (
-                    <MinusLine className="h-2 w-2" />
-                  ) : (
-                    <PlusLine className="h-3 w-3" />
-                  )}
-                </ValueChangeIndicator>
-                {utils.formatPercentDigit(
-                  formatUnits(nftBoost, stakingToken?.token_decimal)
-                )}
-              </ValueChange>
-            ),
-            hidden,
-          },
-          ...(isBoosting
-            ? [
-                {
-                  value: (
-                    <div className="flex items-center space-x-1">
-                      {["/nft/wood.png", "/nft/thor-hammer.png"].map((src) => (
-                        <Image
-                          key={src}
-                          src={src}
-                          alt=""
-                          width={32}
-                          height={32}
-                        />
-                      ))}
-                    </div>
-                  ),
-                },
-              ]
-            : stakedAmount.isZero()
-            ? []
-            : [
-                {
-                  value: (
-                    <Button variant="outline" onClick={onBoost} disabled>
-                      Boost
-                    </Button>
-                  ),
-                },
-              ]),
+          // {
+          //   label: "My NFTs Boost",
+          //   value: nftBoost.isZero() ? (
+          //     "0"
+          //   ) : (
+          //     <ValueChange
+          //       trend={nftBoost.isNegative() ? "down" : "up"}
+          //       className="!gap-0.5 font-semibold"
+          //     >
+          //       <ValueChangeIndicator>
+          //         {nftBoost.isNegative() ? (
+          //           <MinusLine className="h-2 w-2" />
+          //         ) : (
+          //           <PlusLine className="h-3 w-3" />
+          //         )}
+          //       </ValueChangeIndicator>
+          //       {utils.formatPercentDigit(
+          //         formatUnits(nftBoost, stakingToken?.token_decimal)
+          //       )}
+          //     </ValueChange>
+          //   ),
+          //   hidden,
+          // },
+          // ...(isBoosting
+          //   ? [
+          //       {
+          //         value: (
+          //           <div className="flex items-center space-x-1">
+          //             {["/nft/wood.png", "/nft/thor-hammer.png"].map((src) => (
+          //               <Image
+          //                 key={src}
+          //                 src={src}
+          //                 alt=""
+          //                 width={32}
+          //                 height={32}
+          //               />
+          //             ))}
+          //           </div>
+          //         ),
+          //       },
+          //     ]
+          //   : stakedAmount.isZero()
+          //   ? []
+          //   : [
+          //       {
+          //         value: (
+          //           <Button variant="outline" onClick={onBoost} disabled>
+          //             Boost
+          //           </Button>
+          //         ),
+          //       },
+          //     ]),
         ]}
         actions={
           stakedAmount.isZero() ? (
@@ -300,9 +260,11 @@ export const FlexibleStakingCard = (props: Props) => {
                 color={unclaimedRewards ? "primary" : ""}
                 className="pl-1 pr-0.5"
               >
-                {utils.formatTokenDigit(
-                  formatUnits(unclaimedRewards, rewardToken?.token_decimal)
-                )}
+                {
+                  formatTokenAmount(
+                    formatUnits(unclaimedRewards, rewardToken?.token_decimal)
+                  ).display
+                }
               </Typography>
               <Typography level="h9" color="textDisabled">
                 {rewardToken?.token_symbol}
@@ -311,16 +273,7 @@ export const FlexibleStakingCard = (props: Props) => {
           ),
           hidden,
         }}
-        footerExtra={
-          !unclaimedRewards.isZero() && rewardClaimableDate ? (
-            <Countdown finishTime={rewardClaimableDate}>
-              <Button variant="outline" disabled={isClaiming} onClick={onClaim}>
-                {isClaiming && <Spinner className="w-4 h-4" />}
-                {isClaiming ? "Claiming" : "Claim"}
-              </Button>
-            </Countdown>
-          ) : null
-        }
+        footerExtra={null}
       />
       <FlexibleStakeModal
         open={isOpenFlexibleStakeModal}

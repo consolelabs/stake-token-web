@@ -1,7 +1,7 @@
 "use client";
 
 import { Footer } from "@/components/footer";
-import { Button, IconButton, Typography } from "@mochi-ui/core";
+import { IconButton, Typography } from "@mochi-ui/core";
 import { EyeHiddenSolid, EyeShowSolid } from "@mochi-ui/icons";
 import { useLoginWidget } from "@mochi-web3/login-widget";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -16,7 +16,7 @@ import { TokenImage } from "@/components/token-image";
 import { Header } from "@/components/header/header";
 
 const Overview = () => {
-  const { isLoggedIn } = useLoginWidget();
+  const { isLoggedIn, isLoggingIn } = useLoginWidget();
   const { stakingPools } = useTokenStaking();
   const {
     balance,
@@ -27,6 +27,32 @@ const Overview = () => {
   } = useFlexibleStaking();
   const [showInfo, setShowInfo] = useState(false);
 
+  const totalStakedAmount = stakingToken?.token_price
+    ? `$${utils.formatTokenDigit(
+        formatUnits(
+          stakedAmount
+            .mul(parseUnits(String(stakingToken.token_price)))
+            .div(parseUnits("1")),
+          stakingToken?.token_decimal
+        )
+      )}`
+    : `${utils.formatTokenDigit(
+        formatUnits(stakedAmount, stakingToken?.token_decimal)
+      )} ${stakingToken?.token_symbol}`;
+
+  const totalRewards = rewardToken?.token_price
+    ? `$${utils.formatTokenDigit(
+        formatUnits(
+          totalEarnedRewards
+            .mul(parseUnits(String(rewardToken.token_price)))
+            .div(parseUnits("1")),
+          rewardToken?.token_decimal
+        )
+      )}`
+    : `${utils.formatTokenDigit(
+        formatUnits(totalEarnedRewards, rewardToken?.token_decimal)
+      )} ${rewardToken?.token_symbol}`;
+
   const initShowInfo = useRef(false);
   useEffect(() => {
     if (!!balance && !balance.isZero() && !showInfo && !initShowInfo.current) {
@@ -34,6 +60,10 @@ const Overview = () => {
       setShowInfo(true);
     }
   }, [balance, showInfo]);
+
+  if (isLoggingIn) {
+    return null;
+  }
 
   return (
     <div className="overflow-y-auto h-[calc(100vh-56px)] flex flex-col">
@@ -81,14 +111,14 @@ const Overview = () => {
                     )}
                   </IconButton>
                 </div>
-                <div className="flex items-center space-x-4">
+                {/* <div className="flex items-center space-x-4">
                   <Button variant="link" className="pr-0 pl-0 h-fit" disabled>
                     Claim all
                   </Button>
                   <Button variant="link" className="pr-0 pl-0 h-fit" disabled>
                     Restake
                   </Button>
-                </div>
+                </div> */}
               </div>
               <div className="flex justify-between items-center py-3 border-b border-divider">
                 <div className="space-y-0.5">
@@ -96,20 +126,7 @@ const Overview = () => {
                     Total amount staked
                   </Typography>
                   <Typography level="h6" fontWeight="lg">
-                    {showInfo
-                      ? utils.formatUsdDigit(
-                          formatUnits(
-                            stakedAmount
-                              .mul(
-                                parseUnits(
-                                  String(stakingToken?.token_price || 1)
-                                )
-                              )
-                              .div(parseUnits("1")),
-                            stakingToken?.token_decimal
-                          )
-                        )
-                      : "*********"}
+                    {showInfo ? totalStakedAmount : "*********"}
                   </Typography>
                 </div>
                 <div className="flex items-center ml-2 space-x-1">
@@ -124,23 +141,10 @@ const Overview = () => {
               <div className="grid grid-cols-2 gap-6 items-center py-3">
                 <div className="space-y-0.5">
                   <Typography level="p6" className="text-text-tertiary">
-                    Rewards earned
+                    Cumulative Total Reward
                   </Typography>
                   <Typography level="h6" fontWeight="lg" color="success">
-                    {showInfo
-                      ? utils.formatUsdDigit(
-                          formatUnits(
-                            totalEarnedRewards
-                              .mul(
-                                parseUnits(
-                                  String(rewardToken?.token_price || 1)
-                                )
-                              )
-                              .div(parseUnits("1")),
-                            rewardToken?.token_decimal
-                          )
-                        )
-                      : "********"}
+                    {showInfo ? totalRewards : "********"}
                   </Typography>
                 </div>
                 <div className="space-y-0.5">
