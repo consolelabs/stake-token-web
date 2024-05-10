@@ -29,7 +29,6 @@ export const FlexibleUnstakePreview = (props: Props) => {
     poolContract,
     stakedAmount,
     stakingToken,
-    unclaimedRewards,
     rewardToken,
     latestUnstaking,
     updateValues,
@@ -45,25 +44,19 @@ export const FlexibleUnstakePreview = (props: Props) => {
     if (!poolContract) return;
     try {
       setIsLoading(true);
-      const unclaimedRewards =
-        (await poolContract.getRewardAvailableForClaim()) || constants.Zero;
       const txHash = await poolContract.claimReward();
       if (!txHash) {
         throw new Error("Failed to stake");
       }
-      setValues((values) => ({
-        latestUnstaking: {
-          ...values.latestUnstaking!,
-          rewards: Number(
-            formatUnits(unclaimedRewards, rewardToken?.token_decimal)
-          ),
-        },
-      }));
+      let unclaimedRewards = constants.Zero;
       // FIXME: retry to get updated values
       await retry(
         async () => {
           const newUnclaimedRewards =
             await poolContract.getRewardAvailableForClaim();
+          if (newUnclaimedRewards?.gte(unclaimedRewards)) {
+            unclaimedRewards = newUnclaimedRewards;
+          }
           if (
             !newUnclaimedRewards ||
             newUnclaimedRewards.gte(unclaimedRewards)
@@ -75,6 +68,14 @@ export const FlexibleUnstakePreview = (props: Props) => {
         3000,
         100
       );
+      setValues((values) => ({
+        latestUnstaking: {
+          ...values.latestUnstaking!,
+          rewards: Number(
+            formatUnits(unclaimedRewards, rewardToken?.token_decimal)
+          ),
+        },
+      }));
       await updateValues();
       onSuccess();
       setIsLoading(false);
@@ -159,7 +160,9 @@ export const FlexibleUnstakePreview = (props: Props) => {
       <div className="py-3 grid grid-cols-2 gap-2 items-center">
         <Typography level="p4">You&apos;re unstaking</Typography>
         <Typography level="p5" className="text-text-tertiary text-right">
-          ~ {utils.formatUsdDigit(amount * (stakingToken?.token_price || 1))}
+          {stakingToken?.token_price
+            ? `~ ${utils.formatUsdDigit(amount * stakingToken.token_price)}`
+            : ""}
         </Typography>
         <div className="flex items-center space-x-2">
           <TokenImage symbol={stakingToken?.token_symbol} size={24} />
