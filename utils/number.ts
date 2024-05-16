@@ -40,3 +40,17 @@ export const getUsdAmount = (
   if (!price) return amount;
   return amount.mul(parseUnits(String(price || 1))).div(parseUnits("1"));
 };
+
+export function formatTokenDigit(value: any) {
+  const bound = {
+    hi: 1_000_000,
+    lo: -1_000_000,
+  };
+  if (typeof value === "object")
+    return utils.formatTokenDigit({ value: value.value, bound });
+
+  return utils.formatTokenDigit({
+    value,
+    bound,
+  });
+}
