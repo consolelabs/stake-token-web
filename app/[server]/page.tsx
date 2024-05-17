@@ -8,8 +8,6 @@ import Image from "next/image";
 import { Button, Typography } from "@mochi-ui/core";
 import { PlusLine, VaultSolid } from "@mochi-ui/icons";
 import { Highlights } from "@/components/overview/highlights";
-import { About } from "@/components/overview/about";
-import { BountyTable } from "@/components/overview/bounty-table";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { useParams } from "next/navigation";
@@ -96,11 +94,9 @@ const Overview = () => {
             </Button>
           </div>
         </div>
-        <div className="flex flex-col py-6">
+        <div className="flex flex-col">
           <Highlights />
         </div>
-        <About />
-        <BountyTable />
       </div>
       <div className="mt-auto">
         <Footer />

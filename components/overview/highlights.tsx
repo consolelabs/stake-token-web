@@ -21,6 +21,11 @@ import {
 import utc from "dayjs/plugin/utc";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import dayjs from "dayjs";
+import { Transactions } from "./transactions";
+import { useState } from "react";
+import { About } from "./about";
+import { BountyTable } from "./bounty-table";
+import ChartColumn from "@/public/svg/chart-column.svg";
 dayjs.extend(utc);
 dayjs.extend(advancedFormat);
 
@@ -220,53 +225,72 @@ function NoteCard(props: Extract<Link, { type: "NOTE" }>) {
 
 export function Highlights() {
   const { data } = useServerInfo();
+  const [selectedtab, setSelectedTab] = useState("home");
 
   return (
-    <Tabs defaultValue="home">
-      <TabList>
-        <TabTrigger value="home">
-          <BinocularSolid />
-          Home
-        </TabTrigger>
-        <TabTrigger value="token">
-          <DollarSquareSolid />
-          Token
-        </TabTrigger>
-        <TabTrigger value="bounty">
-          <TrophySolid />
-          Bounty
-        </TabTrigger>
-      </TabList>
-      <div className="py-6">
-        <TabContent value="home" className="grid grid-cols-3 grid-rows-2 gap-4">
-          {data?.links.map((l, i) => {
-            let Card: (args: any) => JSX.Element = () => <></>;
-            switch (l.type) {
-              case "LINK":
-                Card = LinkCard;
-                break;
-              case "SOCIAL_MEDIA":
-                Card = SocialCard;
-                break;
-              case "EVENT":
-                Card = EventCard;
-                break;
-              case "VIDEO":
-                Card = VideoCard;
-                break;
-              case "NOTE":
-                Card = NoteCard;
-                break;
-              default:
-                break;
-            }
+    <>
+      <Tabs value={selectedtab} onValueChange={setSelectedTab} className="py-6">
+        <TabList className="[&>div>button]:px-4 [&>div>button]:py-1.5 [&>div>button]:rounded-lg [&>div>button[data-state=active]]:bg-background-level3 [&>div>button[data-state=active]]:text-text-primary">
+          <TabTrigger value="home">
+            <BinocularSolid />
+            Home
+          </TabTrigger>
+          <TabTrigger value="token">
+            <DollarSquareSolid />
+            Token
+          </TabTrigger>
+          <TabTrigger value="bounty">
+            <TrophySolid />
+            Bounty
+          </TabTrigger>
+          <TabTrigger value="transaction">
+            <ChartColumn />
+            Transaction
+          </TabTrigger>
+        </TabList>
+        <div className="py-6">
+          <TabContent
+            value="home"
+            className="grid grid-cols-3 grid-rows-2 gap-4"
+          >
+            {data?.links.map((l, i) => {
+              let Card: (args: any) => JSX.Element = () => <></>;
+              switch (l.type) {
+                case "LINK":
+                  Card = LinkCard;
+                  break;
+                case "SOCIAL_MEDIA":
+                  Card = SocialCard;
+                  break;
+                case "EVENT":
+                  Card = EventCard;
+                  break;
+                case "VIDEO":
+                  Card = VideoCard;
+                  break;
+                case "NOTE":
+                  Card = NoteCard;
+                  break;
+                default:
+                  break;
+              }
 
-            return <Card key={`${i}-${l.type}`} {...l} />;
-          })}
-        </TabContent>
-        <TabContent value="token">token</TabContent>
-        <TabContent value="bounty">bounty</TabContent>
-      </div>
-    </Tabs>
+              return <Card key={`${i}-${l.type}`} {...l} />;
+            })}
+          </TabContent>
+          <TabContent value="token">token</TabContent>
+          <TabContent value="bounty">bounty</TabContent>
+          <TabContent value="transaction">
+            <Transactions />
+          </TabContent>
+        </div>
+      </Tabs>
+      {selectedtab !== "transaction" && (
+        <>
+          <About />
+          <BountyTable />
+        </>
+      )}
+    </>
   );
 }
