@@ -150,7 +150,6 @@ export const FlexibleUnstakePreview = (props: Props) => {
   useEffect(() => {
     if (!initialStep.current) return;
     setStepIndex(initialStep.current);
-    console.log("sdl;jgkldfjglkdfjklj");
     onUnstake();
     initialStep.current = 0;
   }, [onUnstake]);
