@@ -41,17 +41,19 @@ const Overview = () => {
       )} ${stakingToken?.token_symbol}`;
 
   const totalRewards = rewardToken?.token_price
-    ? `$${utils.formatTokenDigit(
-        formatUnits(
+    ? `$${utils.formatDigit({
+        value: formatUnits(
           totalEarnedRewards
             .mul(parseUnits(String(rewardToken.token_price)))
             .div(parseUnits("1")),
           rewardToken?.token_decimal
-        )
-      )}`
-    : `${utils.formatTokenDigit(
-        formatUnits(totalEarnedRewards, rewardToken?.token_decimal)
-      )} ${rewardToken?.token_symbol}`;
+        ),
+        fractionDigits: 6,
+      })}`
+    : `${utils.formatDigit({
+        value: formatUnits(totalEarnedRewards, rewardToken?.token_decimal),
+        fractionDigits: 6,
+      })} ${rewardToken?.token_symbol}`;
 
   const initShowInfo = useRef(false);
   useEffect(() => {
