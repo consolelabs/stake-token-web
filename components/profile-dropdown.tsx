@@ -35,13 +35,19 @@ import { getUsdAmount } from "@/utils/number";
 import { useDisclosure } from "@dwarvesf/react-hooks";
 import Link from "next/link";
 import { useNFTStaking } from "@/store/nft-staking";
+import { useTokenStaking } from "@/store/token-staking";
+import { BigNumber } from "ethers";
 
 const DropdownContent = () => {
   const { profile, logout } = useLoginWidget();
   const { push } = useRouter();
   const params = useParams<{ server: string }>();
-  const { walletsWithBalance, mochiWallet, getConnectedWallet } =
-    useWalletBalance();
+  const {
+    walletsWithBalance,
+    mochiWallet,
+    getConnectedWallet,
+    reset: resetWalletBalance,
+  } = useWalletBalance();
   const {
     reset: resetFlexibleStaking,
     balance: flexibleStakingBalance,
@@ -121,7 +127,7 @@ const DropdownContent = () => {
                     {utils.formatUsdDigit(
                       formatUnits(
                         getUsdAmount(
-                          w.flexibleStaking?.balance,
+                          BigNumber.from(w.flexibleStaking?.balance || "0"),
                           w.flexibleStaking?.price
                         )
                       )
@@ -166,6 +172,7 @@ const DropdownContent = () => {
       <DropdownMenuSeparator className="min-h-[1px]" />
       <DropdownMenuItem
         onClick={() => {
+          resetWalletBalance();
           resetFlexibleStaking();
           resetNFTStaking();
           logout();
@@ -208,15 +215,18 @@ export default function ProfileDropdown({
       ) : null;
   }
 
+  const { stakingPools } = useTokenStaking();
   const initWallets = useRef(false);
   useEffect(() => {
-    if (!isLoggedIn || initWallets.current) return;
+    if (!isLoggedIn || initWallets.current || !stakingPools.length) return;
     initWallets.current = true;
     initializeWallets(wallets);
-  }, [initializeWallets, isLoggedIn, wallets]);
+  }, [initializeWallets, isLoggedIn, stakingPools.length, wallets]);
 
+  const initMochiWallets = useRef(false);
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn || initMochiWallets.current || !stakingPools.length) return;
+    initMochiWallets.current = true;
     initializeMochiWallet({
       name: profile?.profile_name,
       id: profile?.id,
@@ -228,6 +238,7 @@ export default function ProfileDropdown({
     profile?.avatar,
     profile?.id,
     profile?.profile_name,
+    stakingPools.length,
   ]);
 
   return (

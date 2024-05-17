@@ -48,7 +48,7 @@ export const FlexibleUnstakeModal = (props: Props) => {
         <ModalContent
           className="w-full max-w-[530px] overflow-clip"
           ref={(ref) => {
-            if (ref && !container) {
+            if (ref && ref !== container) {
               setContainer(ref);
             }
           }}
